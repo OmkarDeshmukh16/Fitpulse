@@ -1,0 +1,173 @@
+@import url('https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700,800&f[]=satoshi@300,400,500,700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-base: #050505;
+  --color-surface: rgba(255, 255, 255, 0.04);
+  --color-purple: #7C3AED;
+  --color-purple-dim: #5B21B6;
+  --color-purple-light: #A78BFA;
+
+  --font-clash: 'Clash Display', sans-serif;
+  --font-satoshi: 'Satoshi', sans-serif;
+
+  --shadow-glow: 0 0 40px rgba(124, 58, 237, 0.4);
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: auto; /* Lenis handles smooth scroll */
+  overflow-x: hidden;
+}
+
+body {
+  background-color: #050505;
+  color: #ffffff;
+  font-family: 'Satoshi', sans-serif;
+  cursor: none;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+::-webkit-scrollbar-thumb {
+  background: #7C3AED;
+  border-radius: 2px;
+}
+
+/* Glass utility */
+.glass {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Purple glow text */
+.text-glow-purple {
+  color: #7C3AED;
+  text-shadow: 0 0 30px rgba(124, 58, 237, 0.8), 0 0 60px rgba(124, 58, 237, 0.4);
+}
+
+/* Noise texture overlay */
+.noise-overlay::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+  opacity: 0.035;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Gradient border animation */
+@keyframes border-spin {
+  0% { --angle: 0deg; }
+  100% { --angle: 360deg; }
+}
+
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.animated-border {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(#0a0a0f, #0a0a0f) padding-box,
+    conic-gradient(from var(--angle), transparent 30%, #7C3AED 50%, transparent 70%) border-box;
+  animation: border-spin 4s linear infinite;
+}
+
+/* Shimmer keyframe for dashboard glass */
+@keyframes shimmer {
+  0% { transform: translateX(-150%) skewX(-15deg); }
+  100% { transform: translateX(350%) skewX(-15deg); }
+}
+
+/* Marquee animation */
+@keyframes marquee-left {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes marquee-right {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+.marquee-left {
+  animation: marquee-left 35s linear infinite;
+}
+
+.marquee-right {
+  animation: marquee-right 30s linear infinite;
+}
+
+.marquee-left:hover,
+.marquee-right:hover {
+  animation-play-state: paused;
+}
+
+/* Float keyframe */
+@keyframes float-up-down {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+/* Pulse glow */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(124, 58, 237, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(124, 58, 237, 0.7); }
+}
+
+/* Outlined large text */
+.text-outline {
+  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.15);
+  color: transparent;
+}
+
+.text-outline:hover {
+  -webkit-text-stroke: 1px rgba(124, 58, 237, 0.5);
+  color: rgba(124, 58, 237, 0.05);
+  text-shadow: 0 0 80px rgba(124, 58, 237, 0.2);
+  transition: all 0.6s ease;
+}
+
+/* Loading progress bar */
+@keyframes progress-fill {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+/* Section visibility */
+.section-hidden {
+  opacity: 0;
+  transform: translateY(40px);
+}
