@@ -152,7 +152,16 @@ function FeatureCard({ feature, index }) {
 
 export default function FeaturesSection() {
   return (
-    <section id="features" className="relative z-10 py-32 px-6">
+    <section
+      id="features"
+      className="relative z-10 py-32 overflow-hidden"
+      style={{
+        paddingTop: 'clamp(16px, 6vw, 100px)',
+        paddingBottom: 'clamp(16px, 6vw, 100px)',
+        paddingLeft: 'clamp(24px, 6vw, 100px)',
+        paddingRight: 'clamp(24px, 6vw, 100px)',
+      }}
+    >
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <motion.span

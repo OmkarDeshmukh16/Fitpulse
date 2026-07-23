@@ -68,7 +68,16 @@ function StatCounter({ stat, index }) {
 
 export default function StatsSection() {
   return (
-    <section id="stats" className="relative z-10 py-24 px-6">
+    <section
+      id="stats"
+      className="relative z-10 py-24 overflow-hidden"
+      style={{
+        paddingTop: 'clamp(16px, 6vw, 100px)',
+        paddingBottom: 'clamp(16px, 6vw, 100px)',
+        paddingLeft: 'clamp(24px, 6vw, 100px)',
+        paddingRight: 'clamp(24px, 6vw, 100px)',
+      }}
+    >
       {/* Background separator */}
       <div className="absolute inset-0 pointer-events-none"
         style={{ background: 'linear-gradient(to bottom, transparent, rgba(124,58,237,0.03), transparent)' }} />

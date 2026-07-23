@@ -61,10 +61,19 @@ export default function PricingSection() {
   const [annual, setAnnual] = useState(false)
 
   return (
-    <section id="pricing" className="relative z-10 py-32 px-6">
+    <section
+      id="pricing"
+      className="relative z-10 py-32 overflow-hidden"
+      style={{
+        paddingLeft: 'clamp(24px, 6vw, 100px)',
+        paddingRight: 'clamp(24px, 6vw, 100px)',
+        paddingTop: 'clamp(16px, 6vw, 100px)',
+        paddingBottom: 'clamp(16px, 6vw, 100px)',
+      }}
+    >
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-14">
+        <div className="text-center mb-16 md:mb-24">
           <motion.span className="inline-block text-xs font-semibold tracking-[0.2em] uppercase text-purple-400 mb-4"
             style={{ fontFamily: 'Satoshi, sans-serif' }}
             initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
@@ -78,26 +87,26 @@ export default function PricingSection() {
           </motion.h2>
 
           {/* Billing toggle */}
-          <div className="flex items-center justify-center gap-4 mt-6">
-            <span className={`text-sm ${!annual ? 'text-white' : 'text-white/40'}`}
+          <div className="flex items-center justify-center gap-4 mt-8 pb-12">
+            <span className={`text-base font-medium ${!annual ? 'text-white' : 'text-white/40'}`}
               style={{ fontFamily: 'Satoshi, sans-serif' }}>Monthly</span>
             <button
-              className="relative w-12 h-6 rounded-full cursor-none"
-              style={{ background: annual ? '#7C3AED' : 'rgba(255,255,255,0.1)' }}
+              className="relative w-14 h-7 rounded-full cursor-none transition-colors duration-300"
+              style={{ background: annual ? '#7C3AED' : 'rgba(255,255,255,0.12)' }}
               onClick={() => setAnnual(!annual)}
             >
               <motion.div
-                className="absolute w-5 h-5 bg-white rounded-full top-0.5"
-                animate={{ left: annual ? '26px' : '2px' }}
+                className="absolute w-5 h-5 bg-white rounded-full top-1"
+                animate={{ left: annual ? '32px' : '4px' }}
                 transition={{ type: 'spring', stiffness: 500, damping: 30 }}
               />
             </button>
-            <span className={`text-sm flex items-center gap-2 ${annual ? 'text-white' : 'text-white/40'}`}
+            <span className={`text-base font-medium flex items-center gap-2.5 ${annual ? 'text-white' : 'text-white/40'}`}
               style={{ fontFamily: 'Satoshi, sans-serif' }}>
               Annual
               {annual && (
-                <span className="px-2 py-0.5 rounded-full text-xs text-white"
-                  style={{ background: 'rgba(16,185,129,0.15)', color: '#34D399', border: '1px solid rgba(16,185,129,0.2)' }}>
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                  style={{ background: 'rgba(16,185,129,0.15)', color: '#34D399', border: '1px solid rgba(16,185,129,0.3)' }}>
                   Save 20%
                 </span>
               )}
@@ -106,30 +115,28 @@ export default function PricingSection() {
         </div>
 
         {/* Pricing cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch pt-6 mt-12 md:mt-16">
           {plans.map((plan, i) => (
             <motion.div
               key={plan.name}
-              className="relative rounded-2xl p-7 cursor-none"
+              className="relative rounded-3xl p-8 flex flex-col justify-between cursor-none"
               style={{
-                background: plan.popular ? 'rgba(124,58,237,0.08)' : 'rgba(255,255,255,0.03)',
+                background: plan.popular ? 'rgba(124,58,237,0.1)' : 'rgba(255,255,255,0.03)',
                 backdropFilter: 'blur(20px)',
-                border: plan.popular ? '1px solid rgba(124,58,237,0.35)' : '1px solid rgba(255,255,255,0.07)',
+                border: plan.popular ? '1px solid rgba(124,58,237,0.45)' : '1px solid rgba(255,255,255,0.08)',
                 boxShadow: plan.popular
-                  ? '0 30px 80px rgba(124,58,237,0.2), 0 0 0 1px rgba(124,58,237,0.15)'
+                  ? '0 30px 90px rgba(124,58,237,0.25), 0 0 0 1px rgba(124,58,237,0.2)'
                   : '0 8px 30px rgba(0,0,0,0.3)',
-                marginBottom: plan.popular ? 0 : 0,
-                transform: plan.popular ? 'translateY(-20px)' : 'none',
               }}
               initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: plan.popular ? -20 : 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
               whileHover={{
                 boxShadow: plan.popular
-                  ? '0 40px 100px rgba(124,58,237,0.3), 0 0 0 1px rgba(124,58,237,0.25)'
-                  : '0 20px 60px rgba(124,58,237,0.12), 0 0 0 1px rgba(124,58,237,0.15)',
-                y: plan.popular ? -26 : -6,
+                  ? '0 40px 110px rgba(124,58,237,0.35), 0 0 0 1px rgba(124,58,237,0.3)'
+                  : '0 20px 60px rgba(124,58,237,0.15), 0 0 0 1px rgba(124,58,237,0.2)',
+                y: -6,
               }}
             >
               {/* Popular badge */}
@@ -200,7 +207,7 @@ export default function PricingSection() {
                 ))}
               </ul>
 
-              <MagneticButton variant={plan.popular ? 'primary' : 'ghost'} className="w-full justify-center">
+              <MagneticButton variant={plan.popular ? 'primary' : 'ghost'} size="lg" className="w-full justify-center text-center">
                 {plan.cta}
               </MagneticButton>
             </motion.div>

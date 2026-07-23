@@ -10,7 +10,15 @@ const footerLinks = {
 
 export default function Footer() {
   return (
-    <footer id="footer" className="relative z-10 pt-20 pb-10 px-6 border-t border-white/[0.05]">
+    <footer
+      id="footer"
+      className="relative z-10 pt-20 pb-10 border-t border-white/[0.05]"
+      style={{
+        paddingTop: 'clamp(24px, 6vw, 100px)',
+        paddingLeft: 'clamp(24px, 6vw, 100px)',
+        paddingRight: 'clamp(24px, 6vw, 100px)',
+      }}
+    >
       <div className="max-w-7xl mx-auto">
 
         {/* Giant FITPULSE text */}
@@ -33,13 +41,13 @@ export default function Footer() {
         <motion.div className="text-center mb-20"
           initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }} transition={{ duration: 0.7 }}>
-          <p className="text-white/40 text-lg mb-6" style={{ fontFamily: 'Satoshi, sans-serif' }}>
+          <p className="text-white/50 text-xl font-medium mb-8" style={{ fontFamily: 'Satoshi, sans-serif' }}>
             Ready to grow your gym?
           </p>
-          <MagneticButton variant="primary">
+          <MagneticButton variant="primary" size="xl">
             Book a Demo
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
           </MagneticButton>
         </motion.div>

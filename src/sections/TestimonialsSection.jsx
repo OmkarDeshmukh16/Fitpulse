@@ -112,8 +112,17 @@ export default function TestimonialsSection() {
   const doubled = [...testimonials, ...testimonials]
 
   return (
-    <section id="testimonials" className="relative z-10 py-28 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 text-center mb-14">
+    <section
+      id="testimonials"
+      className="relative z-10 py-28 overflow-hidden"
+      style={{
+        paddingTop: 'clamp(16px, 6vw, 100px)',
+        paddingBottom: 'clamp(16px, 6vw, 100px)',
+        paddingLeft: 'clamp(24px, 6vw, 100px)',
+        paddingRight: 'clamp(24px, 6vw, 100px)',
+      }}
+    >
+      <div className="max-w-7xl mx-auto text-center mb-14">
         <motion.span className="inline-block text-xs font-semibold tracking-[0.2em] uppercase text-purple-400 mb-4"
           style={{ fontFamily: 'Satoshi, sans-serif' }}
           initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>

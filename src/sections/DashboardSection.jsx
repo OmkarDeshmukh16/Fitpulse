@@ -116,7 +116,15 @@ export default function DashboardSection() {
   const barData = [40, 65, 50, 80, 72, 90, 68, 85, 78, 95, 88, 100]
 
   return (
-    <section id="dashboard" ref={ref} className="relative z-10 py-32 px-6">
+    <section
+      id="dashboard"
+      ref={ref}
+      className="relative z-10 py-32 overflow-hidden"
+      style={{
+        paddingLeft: 'clamp(24px, 6vw, 100px)',
+        paddingRight: 'clamp(24px, 6vw, 100px)',
+      }}
+    >
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <motion.span className="inline-block text-xs font-semibold tracking-[0.2em] uppercase text-purple-400 mb-4"
