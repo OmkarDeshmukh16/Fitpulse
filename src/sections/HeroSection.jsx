@@ -10,8 +10,8 @@ export default function HeroSection() {
       id="hero"
       className="relative min-h-screen flex items-center z-10 overflow-hidden"
       style={{
-        paddingTop: 110,
-        paddingBottom: 'clamp(16px, 6vw, 100px)',
+        paddingTop: 120,
+        paddingBottom: 'clamp(32px, 6vw, 100px)',
         paddingLeft: 'clamp(24px, 6vw, 100px)',
         paddingRight: 'clamp(24px, 6vw, 100px)',
       }}
