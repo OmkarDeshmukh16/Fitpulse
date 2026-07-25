@@ -11,7 +11,7 @@ export default function HeroSection() {
       className="relative min-h-screen flex items-center z-10 overflow-hidden"
       style={{
         paddingTop: 120,
-        paddingBottom: 'clamp(32px, 6vw, 100px)',
+        paddingBottom: 'clamp(24px, 6vw, 100px)',
         paddingLeft: 'clamp(24px, 6vw, 100px)',
         paddingRight: 'clamp(24px, 6vw, 100px)',
       }}
