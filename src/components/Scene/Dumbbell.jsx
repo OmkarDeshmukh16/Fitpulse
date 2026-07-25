@@ -8,93 +8,128 @@ export default function Dumbbell({ position = [0, 0, 0], floatOffset = 0 }) {
     if (!groupRef.current) return
     const t = clock.getElapsedTime()
     groupRef.current.position.y = position[1] + Math.sin(t * 0.5 + floatOffset) * 0.2
-    groupRef.current.rotation.y += 0.004
+    groupRef.current.rotation.y += 0.005
     groupRef.current.rotation.x = Math.sin(t * 0.3) * 0.08
   })
 
-  const metalProps = {
-    metalness: 0.95,
-    roughness: 0.15,
-    color: '#888888',
-    envMapIntensity: 1.5,
-  }
-
-  const darkMetal = {
-    metalness: 0.9,
-    roughness: 0.3,
-    color: '#1c1c1c',
-  }
-
   return (
     <group ref={groupRef} position={position}>
-      {/* Handle bar */}
+      {/* Chrome Handle Bar */}
       <mesh castShadow rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[0.07, 0.07, 1.6, 24]} />
-        <meshStandardMaterial {...metalProps} color="#aaaaaa" />
+        <cylinderGeometry args={[0.075, 0.075, 1.7, 32]} />
+        <meshPhysicalMaterial
+          color="#dcdcdc"
+          metalness={0.98}
+          roughness={0.08}
+          clearcoat={1.0}
+          clearcoatRoughness={0.1}
+          envMapIntensity={2.0}
+        />
       </mesh>
 
-      {/* Knurling rings on handle */}
-      {[-0.3, -0.1, 0.1, 0.3].map((x, i) => (
+      {/* Knurled Grip Bands on Handle */}
+      {[-0.4, -0.2, 0, 0.2, 0.4].map((x, i) => (
         <mesh key={i} position={[x, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-          <torusGeometry args={[0.075, 0.012, 8, 20]} />
-          <meshStandardMaterial {...darkMetal} />
+          <torusGeometry args={[0.078, 0.008, 12, 32]} />
+          <meshStandardMaterial
+            color="#222222"
+            metalness={0.9}
+            roughness={0.4}
+          />
         </mesh>
       ))}
 
-      {/* Left collar */}
-      <mesh position={[-0.9, 0, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
-        <cylinderGeometry args={[0.12, 0.12, 0.15, 24]} />
-        <meshStandardMaterial {...darkMetal} />
-      </mesh>
+      {/* Heavy Steel Collars (Left & Right) */}
+      {[-0.95, 0.95].map((x, i) => (
+        <mesh key={i} position={[x, 0, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
+          <cylinderGeometry args={[0.13, 0.13, 0.16, 32]} />
+          <meshPhysicalMaterial
+            color="#e0e0e0"
+            metalness={0.95}
+            roughness={0.15}
+            clearcoat={0.8}
+          />
+        </mesh>
+      ))}
 
-      {/* Right collar */}
-      <mesh position={[0.9, 0, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
-        <cylinderGeometry args={[0.12, 0.12, 0.15, 24]} />
-        <meshStandardMaterial {...darkMetal} />
-      </mesh>
-
-      {/* Left plate group */}
-      <group position={[-1.1, 0, 0]}>
+      {/* LEFT HEAVY WEIGHT PLATES CLUSTER */}
+      <group position={[-1.18, 0, 0]}>
+        {/* Outer Rubber Bumper Plate */}
         <mesh rotation={[0, 0, Math.PI / 2]} castShadow>
-          <cylinderGeometry args={[0.38, 0.38, 0.12, 32]} />
-          <meshStandardMaterial {...metalProps} color="#222222" />
+          <cylinderGeometry args={[0.45, 0.45, 0.14, 48]} />
+          <meshPhysicalMaterial
+            color="#141416"
+            roughness={0.35}
+            metalness={0.1}
+            clearcoat={0.5}
+            clearcoatRoughness={0.3}
+          />
         </mesh>
+        {/* Raised Beveled Rim Ring */}
         <mesh rotation={[0, 0, Math.PI / 2]}>
-          <cylinderGeometry args={[0.42, 0.42, 0.06, 32]} />
-          <meshStandardMaterial metalness={0.9} roughness={0.2} color="#333333" />
+          <torusGeometry args={[0.43, 0.025, 12, 48]} />
+          <meshStandardMaterial color="#252528" roughness={0.2} metalness={0.4} />
         </mesh>
-        <mesh position={[0.14, 0, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
-          <cylinderGeometry args={[0.3, 0.3, 0.1, 32]} />
-          <meshStandardMaterial {...metalProps} color="#1a1a1a" />
-        </mesh>
-      </group>
-
-      {/* Right plate group */}
-      <group position={[1.1, 0, 0]}>
-        <mesh rotation={[0, 0, Math.PI / 2]} castShadow>
-          <cylinderGeometry args={[0.38, 0.38, 0.12, 32]} />
-          <meshStandardMaterial {...metalProps} color="#222222" />
-        </mesh>
-        <mesh rotation={[0, 0, Math.PI / 2]}>
-          <cylinderGeometry args={[0.42, 0.42, 0.06, 32]} />
-          <meshStandardMaterial metalness={0.9} roughness={0.2} color="#333333" />
-        </mesh>
+        {/* Secondary Inner Weight Plate */}
         <mesh position={[-0.14, 0, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
-          <cylinderGeometry args={[0.3, 0.3, 0.1, 32]} />
-          <meshStandardMaterial {...metalProps} color="#1a1a1a" />
+          <cylinderGeometry args={[0.38, 0.38, 0.12, 48]} />
+          <meshPhysicalMaterial
+            color="#1c1c20"
+            roughness={0.4}
+            metalness={0.2}
+          />
+        </mesh>
+        {/* Outer End Cap with Weight Numeral Text Ring */}
+        <mesh position={[-0.22, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.32, 0.32, 0.04, 32]} />
+          <meshStandardMaterial color="#0d0d0f" roughness={0.5} metalness={0.3} />
         </mesh>
       </group>
 
-      {/* Purple accent emissive ring on each end */}
-      {[-1.05, 1.05].map((x, i) => (
+      {/* RIGHT HEAVY WEIGHT PLATES CLUSTER */}
+      <group position={[1.18, 0, 0]}>
+        {/* Outer Rubber Bumper Plate */}
+        <mesh rotation={[0, 0, Math.PI / 2]} castShadow>
+          <cylinderGeometry args={[0.45, 0.45, 0.14, 48]} />
+          <meshPhysicalMaterial
+            color="#141416"
+            roughness={0.35}
+            metalness={0.1}
+            clearcoat={0.5}
+            clearcoatRoughness={0.3}
+          />
+        </mesh>
+        {/* Raised Beveled Rim Ring */}
+        <mesh rotation={[0, 0, Math.PI / 2]}>
+          <torusGeometry args={[0.43, 0.025, 12, 48]} />
+          <meshStandardMaterial color="#252528" roughness={0.2} metalness={0.4} />
+        </mesh>
+        {/* Secondary Inner Weight Plate */}
+        <mesh position={[0.14, 0, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
+          <cylinderGeometry args={[0.38, 0.38, 0.12, 48]} />
+          <meshPhysicalMaterial
+            color="#1c1c20"
+            roughness={0.4}
+            metalness={0.2}
+          />
+        </mesh>
+        {/* Outer End Cap */}
+        <mesh position={[0.22, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.32, 0.32, 0.04, 32]} />
+          <meshStandardMaterial color="#0d0d0f" roughness={0.5} metalness={0.3} />
+        </mesh>
+      </group>
+
+      {/* Glowing Purple Metallic Accent Rings */}
+      {[-1.1, 1.1].map((x, i) => (
         <mesh key={i} position={[x, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-          <torusGeometry args={[0.35, 0.025, 8, 32]} />
+          <torusGeometry args={[0.44, 0.015, 12, 48]} />
           <meshStandardMaterial
             color="#7C3AED"
             emissive="#7C3AED"
-            emissiveIntensity={0.8}
-            metalness={0.5}
-            roughness={0.3}
+            emissiveIntensity={1.2}
+            metalness={0.8}
+            roughness={0.1}
           />
         </mesh>
       ))}

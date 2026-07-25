@@ -14,34 +14,47 @@ export default function Kettlebell({ position = [0, 0, 0], floatOffset = 0 }) {
 
   return (
     <group ref={groupRef} position={position} scale={0.85}>
-      {/* Body - main sphere */}
+      {/* Heavy Cast Iron Bell Body */}
       <mesh castShadow position={[0, -0.1, 0]}>
-        <sphereGeometry args={[0.45, 32, 32]} />
-        <meshStandardMaterial color="#1a1a1a" metalness={0.8} roughness={0.4} />
+        <sphereGeometry args={[0.48, 36, 36]} />
+        <meshPhysicalMaterial
+          color="#161618"
+          roughness={0.5}
+          metalness={0.4}
+          clearcoat={0.3}
+          clearcoatRoughness={0.4}
+        />
       </mesh>
 
-      {/* Flat bottom */}
-      <mesh position={[0, -0.5, 0]} rotation={[0, 0, 0]}>
-        <cylinderGeometry args={[0.32, 0.32, 0.06, 24]} />
-        <meshStandardMaterial color="#111111" metalness={0.7} roughness={0.5} />
+      {/* Flat Bottom Rubber Base Pad */}
+      <mesh position={[0, -0.52, 0]}>
+        <cylinderGeometry args={[0.34, 0.34, 0.08, 32]} />
+        <meshStandardMaterial color="#0d0d0f" metalness={0.2} roughness={0.7} />
       </mesh>
 
-      {/* Neck */}
-      <mesh position={[0, 0.36, 0]} castShadow>
-        <cylinderGeometry args={[0.12, 0.18, 0.22, 16]} />
-        <meshStandardMaterial color="#222222" metalness={0.85} roughness={0.3} />
-      </mesh>
-
-      {/* Handle - torus */}
+      {/* Smooth Ergonomic Chrome Handle */}
       <mesh position={[0, 0.68, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-        <torusGeometry args={[0.22, 0.06, 12, 24]} />
-        <meshStandardMaterial color="#2a2a2a" metalness={0.9} roughness={0.25} />
+        <torusGeometry args={[0.24, 0.065, 16, 36]} />
+        <meshPhysicalMaterial
+          color="#e0e0e0"
+          metalness={0.97}
+          roughness={0.08}
+          clearcoat={1.0}
+        />
       </mesh>
 
-      {/* Purple weight indicator stripe */}
+      {/* Handle Horn Junctions */}
+      {[-0.24, 0.24].map((x, i) => (
+        <mesh key={i} position={[x, 0.42, 0]} castShadow>
+          <cylinderGeometry args={[0.07, 0.12, 0.3, 20]} />
+          <meshPhysicalMaterial color="#dcdcdc" metalness={0.95} roughness={0.12} />
+        </mesh>
+      ))}
+
+      {/* Glowing Violet Accent Weight Stripe Ring */}
       <mesh position={[0, -0.1, 0]}>
-        <torusGeometry args={[0.46, 0.025, 8, 32]} />
-        <meshStandardMaterial color="#7C3AED" emissive="#7C3AED" emissiveIntensity={0.5} />
+        <torusGeometry args={[0.49, 0.02, 12, 48]} />
+        <meshStandardMaterial color="#7C3AED" emissive="#7C3AED" emissiveIntensity={0.8} />
       </mesh>
     </group>
   )

@@ -21,7 +21,7 @@ export default function WorldScene() {
         }}
         style={{ background: '#050505' }}
       >
-        <fog attach="fog" args={['#050505', 12, 35]} />
+        <fog attach="fog" args={['#050505', 16, 45]} />
 
         <Suspense fallback={null}>
           <Environment preset="warehouse" />
