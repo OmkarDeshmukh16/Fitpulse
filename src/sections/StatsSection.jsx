@@ -70,10 +70,10 @@ export default function StatsSection() {
   return (
     <section
       id="stats"
-      className="relative z-10 py-24 overflow-hidden"
+      className="relative z-10 py-24 overflow-hidden flex flex-col items-center justify-center text-center w-full"
       style={{
-        paddingTop: 'clamp(16px, 6vw, 100px)',
-        paddingBottom: 'clamp(16px, 6vw, 100px)',
+        paddingTop: 'clamp(32px, 6vw, 100px)',
+        paddingBottom: 'clamp(32px, 6vw, 100px)',
         paddingLeft: 'clamp(24px, 6vw, 100px)',
         paddingRight: 'clamp(24px, 6vw, 100px)',
       }}
@@ -82,22 +82,22 @@ export default function StatsSection() {
       <div className="absolute inset-0 pointer-events-none"
         style={{ background: 'linear-gradient(to bottom, transparent, rgba(124,58,237,0.03), transparent)' }} />
 
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-5xl mx-auto w-full flex flex-col items-center justify-center">
         <motion.div
-          className="glass rounded-3xl p-12 md:p-16"
+          className="glass rounded-3xl p-10 sm:p-12 md:p-16 w-full flex flex-col items-center justify-center"
           style={{ boxShadow: '0 0 80px rgba(124,58,237,0.06), 0 0 0 1px rgba(255,255,255,0.04)' }}
           initial={{ opacity: 0, scale: 0.97 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
-          <div className="text-center mb-12">
-            <motion.span className="text-xs font-semibold tracking-[0.2em] uppercase text-purple-400"
+          <div className="flex flex-col items-center justify-center text-center mb-16 w-full">
+            <motion.span className="inline-block text-xs font-semibold tracking-[0.25em] uppercase text-purple-400 mb-4"
               style={{ fontFamily: 'Satoshi, sans-serif' }}
               initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
               By The Numbers
             </motion.span>
-            <motion.h2 className="text-3xl md:text-4xl font-bold text-white mt-3"
+            <motion.h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mt-2"
               style={{ fontFamily: 'Clash Display, sans-serif' }}
               initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }} transition={{ delay: 0.1, duration: 0.7 }}>
@@ -105,7 +105,7 @@ export default function StatsSection() {
             </motion.h2>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-6 w-full">
             {stats.map((stat, i) => (
               <StatCounter key={stat.label} stat={stat} index={i} />
             ))}

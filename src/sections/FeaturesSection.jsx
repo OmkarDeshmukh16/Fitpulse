@@ -154,25 +154,26 @@ export default function FeaturesSection() {
   return (
     <section
       id="features"
-      className="relative z-10 py-32 overflow-hidden"
+      className="relative z-10 py-32 overflow-hidden flex flex-col items-center justify-center text-center w-full"
       style={{
-        paddingTop: 'clamp(16px, 6vw, 100px)',
-        paddingBottom: 'clamp(16px, 6vw, 100px)',
+        paddingTop: 'clamp(32px, 6vw, 100px)',
+        paddingBottom: 'clamp(32px, 6vw, 100px)',
         paddingLeft: 'clamp(24px, 6vw, 100px)',
         paddingRight: 'clamp(24px, 6vw, 100px)',
       }}
     >
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16">
+      <div className="max-w-7xl mx-auto w-full flex flex-col items-center justify-center">
+        {/* Section Header */}
+        <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto mb-20 w-full">
           <motion.span
-            className="inline-block text-xs font-semibold tracking-[0.2em] uppercase text-purple-400 mb-4"
+            className="inline-block text-xs font-semibold tracking-[0.25em] uppercase text-purple-400 mb-5"
             style={{ fontFamily: 'Satoshi, sans-serif' }}
             initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
           >
             Everything You Need
           </motion.span>
           <motion.h2
-            className="text-4xl md:text-5xl font-bold text-white mb-4"
+            className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight leading-tight"
             style={{ fontFamily: 'Clash Display, sans-serif' }}
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }} transition={{ delay: 0.1, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
@@ -180,7 +181,7 @@ export default function FeaturesSection() {
             Built for Modern Gyms
           </motion.h2>
           <motion.p
-            className="text-white/45 text-lg max-w-xl mx-auto"
+            className="text-white/60 text-base sm:text-lg md:text-xl max-w-2xl mx-auto text-center leading-relaxed font-normal"
             style={{ fontFamily: 'Satoshi, sans-serif' }}
             initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
             transition={{ delay: 0.2 }}
@@ -189,7 +190,7 @@ export default function FeaturesSection() {
           </motion.p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 w-full">
           {features.map((feature, i) => (
             <FeatureCard key={feature.title} feature={feature} index={i} />
           ))}

@@ -31,7 +31,7 @@ const plans = [
       'Workout & diet plans',
       'Analytics & reports',
       'Trainer management',
-      'Priority support',
+      'Priority 24/7 support',
       'Custom branding',
     ],
     cta: 'Start Free Trial',
@@ -45,12 +45,12 @@ const plans = [
     features: [
       'Unlimited branches',
       'All Pro features',
-      'Custom integrations',
+      'Custom API integrations',
       'Dedicated account manager',
-      'SLA guarantee',
+      '99.9% SLA guarantee',
       'On-site onboarding',
-      'White-label option',
-      'API access',
+      'White-label mobile app',
+      'API access & webhooks',
     ],
     cta: 'Contact Sales',
     popular: false,
@@ -63,70 +63,91 @@ export default function PricingSection() {
   return (
     <section
       id="pricing"
-      className="relative z-10 py-32 overflow-hidden"
+      className="relative z-10 py-32 overflow-hidden flex flex-col items-center justify-center text-center w-full"
       style={{
+        paddingTop: 'clamp(40px, 7vw, 120px)',
+        paddingBottom: 'clamp(40px, 7vw, 120px)',
         paddingLeft: 'clamp(24px, 6vw, 100px)',
         paddingRight: 'clamp(24px, 6vw, 100px)',
-        paddingTop: 'clamp(16px, 6vw, 100px)',
-        paddingBottom: 'clamp(16px, 6vw, 100px)',
       }}
     >
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-16 md:mb-24">
-          <motion.span className="inline-block text-xs font-semibold tracking-[0.2em] uppercase text-purple-400 mb-4"
+      <div className="max-w-7xl mx-auto w-full flex flex-col items-center justify-center">
+        {/* Section Header */}
+        <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto mb-12 w-full">
+          <motion.span
+            className="inline-block text-xs font-semibold tracking-[0.25em] uppercase text-purple-400 mb-5"
             style={{ fontFamily: 'Satoshi, sans-serif' }}
-            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
-            Simple Pricing
+            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+          >
+            Simple & Transparent
           </motion.span>
-          <motion.h2 className="text-4xl md:text-5xl font-bold text-white mb-4"
+          <motion.h2
+            className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight leading-tight"
             style={{ fontFamily: 'Clash Display, sans-serif' }}
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }} transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}>
+            viewport={{ once: true }} transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          >
             Invest in Your Gym's Growth
           </motion.h2>
-
-          {/* Billing toggle */}
-          <div className="flex items-center justify-center gap-4 mt-8 pb-12">
-            <span className={`text-base font-medium ${!annual ? 'text-white' : 'text-white/40'}`}
-              style={{ fontFamily: 'Satoshi, sans-serif' }}>Monthly</span>
-            <button
-              className="relative w-14 h-7 rounded-full cursor-none transition-colors duration-300"
-              style={{ background: annual ? '#7C3AED' : 'rgba(255,255,255,0.12)' }}
-              onClick={() => setAnnual(!annual)}
-            >
-              <motion.div
-                className="absolute w-5 h-5 bg-white rounded-full top-1"
-                animate={{ left: annual ? '32px' : '4px' }}
-                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-              />
-            </button>
-            <span className={`text-base font-medium flex items-center gap-2.5 ${annual ? 'text-white' : 'text-white/40'}`}
-              style={{ fontFamily: 'Satoshi, sans-serif' }}>
-              Annual
-              {annual && (
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold"
-                  style={{ background: 'rgba(16,185,129,0.15)', color: '#34D399', border: '1px solid rgba(16,185,129,0.3)' }}>
-                  Save 20%
-                </span>
-              )}
-            </span>
-          </div>
+          <motion.p
+            className="text-white/60 text-base sm:text-lg md:text-xl max-w-2xl mx-auto text-center leading-relaxed font-normal"
+            style={{ fontFamily: 'Satoshi, sans-serif' }}
+            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+            transition={{ delay: 0.15 }}
+          >
+            Choose the plan that fits your gym. Upgrade or cancel anytime with zero friction.
+          </motion.p>
         </div>
 
-        {/* Pricing cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch pt-6 mt-12 md:mt-16">
+        {/* Billing toggle */}
+        <motion.div
+          className="flex items-center justify-center gap-5 mb-16 md:mb-20 px-6 py-3 rounded-full border border-white/10"
+          style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(16px)' }}
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.2 }}
+        >
+          <span className={`text-base font-medium transition-colors cursor-none ${!annual ? 'text-white font-bold' : 'text-white/40'}`}
+            style={{ fontFamily: 'Satoshi, sans-serif' }}>
+            Monthly
+          </span>
+          <button
+            className="relative w-14 h-7 rounded-full cursor-none transition-colors duration-300 focus:outline-none"
+            style={{ background: annual ? '#7C3AED' : 'rgba(255,255,255,0.15)' }}
+            onClick={() => setAnnual(!annual)}
+          >
+            <motion.div
+              className="absolute w-5 h-5 bg-white rounded-full top-1 shadow-md"
+              animate={{ left: annual ? '32px' : '4px' }}
+              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+            />
+          </button>
+          <span className={`text-base font-medium flex items-center gap-2.5 transition-colors cursor-none ${annual ? 'text-white font-bold' : 'text-white/40'}`}
+            style={{ fontFamily: 'Satoshi, sans-serif' }}>
+            Annual
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider"
+              style={{ background: 'rgba(16,185,129,0.15)', color: '#34D399', border: '1px solid rgba(16,185,129,0.3)' }}>
+              Save 20%
+            </span>
+          </span>
+        </motion.div>
+
+        {/* Pricing Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-8 lg:gap-10 items-stretch w-full">
           {plans.map((plan, i) => (
             <motion.div
               key={plan.name}
-              className="relative rounded-3xl p-8 flex flex-col justify-between cursor-none"
+              className="relative rounded-3xl p-8 lg:p-10 flex flex-col justify-between text-left cursor-none group transition-all duration-300"
               style={{
-                background: plan.popular ? 'rgba(124,58,237,0.1)' : 'rgba(255,255,255,0.03)',
-                backdropFilter: 'blur(20px)',
-                border: plan.popular ? '1px solid rgba(124,58,237,0.45)' : '1px solid rgba(255,255,255,0.08)',
+                background: plan.popular
+                  ? 'linear-gradient(180deg, rgba(124,58,237,0.16) 0%, rgba(124,58,237,0.04) 100%)'
+                  : 'rgba(255,255,255,0.03)',
+                backdropFilter: 'blur(24px)',
+                border: plan.popular ? '1px solid rgba(124,58,237,0.5)' : '1px solid rgba(255,255,255,0.08)',
                 boxShadow: plan.popular
-                  ? '0 30px 90px rgba(124,58,237,0.25), 0 0 0 1px rgba(124,58,237,0.2)'
-                  : '0 8px 30px rgba(0,0,0,0.3)',
+                  ? '0 30px 90px rgba(124,58,237,0.3), 0 0 0 1px rgba(124,58,237,0.2)'
+                  : '0 8px 32px rgba(0,0,0,0.4)',
               }}
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -134,96 +155,115 @@ export default function PricingSection() {
               transition={{ delay: i * 0.1, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
               whileHover={{
                 boxShadow: plan.popular
-                  ? '0 40px 110px rgba(124,58,237,0.35), 0 0 0 1px rgba(124,58,237,0.3)'
-                  : '0 20px 60px rgba(124,58,237,0.15), 0 0 0 1px rgba(124,58,237,0.2)',
-                y: -6,
+                  ? '0 40px 120px rgba(124,58,237,0.4), 0 0 0 1px rgba(167,139,250,0.4)'
+                  : '0 20px 60px rgba(124,58,237,0.18), 0 0 0 1px rgba(255,255,255,0.15)',
+                y: -8,
               }}
             >
-              {/* Popular badge */}
+              {/* Popular Pill Badge */}
               {plan.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <div className="px-4 py-1.5 rounded-full text-xs font-semibold text-white"
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
+                  <div
+                    className="px-4 py-1.5 rounded-full text-xs font-bold text-white uppercase tracking-wider shadow-lg"
                     style={{
                       background: 'linear-gradient(135deg, #7C3AED, #5B21B6)',
-                      boxShadow: '0 4px 16px rgba(124,58,237,0.5)',
+                      boxShadow: '0 4px 20px rgba(124,58,237,0.6)',
                       fontFamily: 'Satoshi, sans-serif',
-                    }}>
+                    }}
+                  >
                     ✦ Most Popular
                   </div>
                 </div>
               )}
 
-              {/* Animated border for popular */}
-              {plan.popular && (
-                <div className="animated-border absolute inset-0 rounded-2xl pointer-events-none opacity-40" />
-              )}
+              <div>
+                {/* Header info */}
+                <div className="mb-8 border-b border-white/[0.08] pb-6">
+                  <h3 className="text-white font-bold text-2xl mb-2" style={{ fontFamily: 'Clash Display, sans-serif' }}>
+                    {plan.name}
+                  </h3>
+                  <p className="text-white/50 text-sm leading-relaxed" style={{ fontFamily: 'Satoshi, sans-serif' }}>
+                    {plan.desc}
+                  </p>
+                </div>
 
-              {/* Plan name */}
-              <div className="mb-6">
-                <h3 className="text-white font-bold text-xl mb-1" style={{ fontFamily: 'Clash Display, sans-serif' }}>
-                  {plan.name}
-                </h3>
-                <p className="text-white/40 text-sm" style={{ fontFamily: 'Satoshi, sans-serif' }}>{plan.desc}</p>
-              </div>
-
-              {/* Price */}
-              <div className="mb-7">
-                {plan.monthlyPrice ? (
-                  <div className="flex items-end gap-1">
-                    <AnimatePresence mode="wait">
-                      <motion.span
-                        key={annual ? 'annual' : 'monthly'}
-                        className="text-4xl font-bold text-white"
-                        style={{ fontFamily: 'Clash Display, sans-serif' }}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        ₹{annual ? plan.annualPrice : plan.monthlyPrice}
-                      </motion.span>
-                    </AnimatePresence>
-                    <span className="text-white/35 text-sm mb-1" style={{ fontFamily: 'Satoshi, sans-serif' }}>/mo</span>
-                  </div>
-                ) : (
-                  <div className="text-3xl font-bold text-white" style={{ fontFamily: 'Clash Display, sans-serif' }}>
-                    Custom
-                  </div>
-                )}
-              </div>
-
-              {/* Features */}
-              <ul className="flex flex-col gap-2.5 mb-7">
-                {plan.features.map((f) => (
-                  <li key={f} className="flex items-center gap-2.5">
-                    <div className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0"
-                      style={{ background: plan.popular ? 'rgba(124,58,237,0.2)' : 'rgba(255,255,255,0.06)' }}>
-                      <svg className="w-2.5 h-2.5" fill="none" stroke={plan.popular ? '#A78BFA' : 'rgba(255,255,255,0.5)'} viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
+                {/* Price block */}
+                <div className="mb-8">
+                  {plan.monthlyPrice ? (
+                    <div className="flex items-baseline gap-2">
+                      <AnimatePresence mode="wait">
+                        <motion.span
+                          key={annual ? 'annual' : 'monthly'}
+                          className="text-5xl font-extrabold text-white tracking-tight"
+                          style={{ fontFamily: 'Clash Display, sans-serif' }}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          ₹{annual ? plan.annualPrice.toLocaleString() : plan.monthlyPrice.toLocaleString()}
+                        </motion.span>
+                      </AnimatePresence>
+                      <span className="text-white/40 text-base font-medium" style={{ fontFamily: 'Satoshi, sans-serif' }}>/month</span>
                     </div>
-                    <span className="text-white/60 text-sm" style={{ fontFamily: 'Satoshi, sans-serif' }}>{f}</span>
-                  </li>
-                ))}
-              </ul>
+                  ) : (
+                    <div className="text-4xl font-extrabold text-white tracking-tight" style={{ fontFamily: 'Clash Display, sans-serif' }}>
+                      Custom Pricing
+                    </div>
+                  )}
+                </div>
 
-              <MagneticButton variant={plan.popular ? 'primary' : 'ghost'} size="lg" className="w-full justify-center text-center">
+                {/* Features list */}
+                <div className="mb-10">
+                  <div className="text-xs font-semibold uppercase tracking-wider text-purple-400 mb-4" style={{ fontFamily: 'Satoshi, sans-serif' }}>
+                    What's Included:
+                  </div>
+                  <ul className="flex flex-col gap-3.5">
+                    {plan.features.map((f) => (
+                      <li key={f} className="flex items-center gap-3">
+                        <div
+                          className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
+                          style={{ background: plan.popular ? 'rgba(124,58,237,0.25)' : 'rgba(255,255,255,0.08)' }}
+                        >
+                          <svg className="w-3 h-3" fill="none" stroke={plan.popular ? '#A78BFA' : '#34D399'} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <span className="text-white/80 text-sm font-medium" style={{ fontFamily: 'Satoshi, sans-serif' }}>
+                          {f}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* Action Button */}
+              <MagneticButton
+                variant={plan.popular ? 'primary' : 'ghost'}
+                size="xl"
+                className="w-full justify-center text-center mt-auto"
+              >
                 {plan.cta}
               </MagneticButton>
             </motion.div>
           ))}
         </div>
 
-        {/* Trust line */}
-        <motion.p className="text-center text-white/30 text-sm mt-12"
+        {/* Trust Footer line */}
+        <motion.p
+          className="text-center text-white/40 text-sm font-medium mt-16"
           style={{ fontFamily: 'Satoshi, sans-serif' }}
-          initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
-          All plans include 14-day free trial · No credit card required · Cancel anytime
+          initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}
+        >
+          All plans include 14-day free trial · No credit card required · Instant setup
         </motion.p>
       </div>
 
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] pointer-events-none opacity-[0.04]"
-        style={{ background: 'radial-gradient(ellipse, #7C3AED, transparent 70%)', filter: 'blur(60px)' }} />
+      <div
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] pointer-events-none opacity-[0.05]"
+        style={{ background: 'radial-gradient(ellipse, #7C3AED, transparent 70%)', filter: 'blur(80px)' }}
+      />
     </section>
   )
 }

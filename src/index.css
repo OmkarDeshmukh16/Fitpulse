@@ -98,11 +98,16 @@ body {
 }
 
 .animated-border {
-  border: 1px solid transparent;
-  background:
-    linear-gradient(#0a0a0f, #0a0a0f) padding-box,
-    conic-gradient(from var(--angle), transparent 30%, #7C3AED 50%, transparent 70%) border-box;
-  animation: border-spin 4s linear infinite;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(from var(--angle), transparent 30%, #7C3AED 60%, transparent 80%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: border-spin 3s linear infinite;
 }
 
 /* Shimmer keyframe for dashboard glass */

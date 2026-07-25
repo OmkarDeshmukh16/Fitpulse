@@ -114,52 +114,56 @@ export default function TestimonialsSection() {
   return (
     <section
       id="testimonials"
-      className="relative z-10 py-28 overflow-hidden"
+      className="relative z-10 py-28 overflow-hidden flex flex-col items-center justify-center text-center w-full"
       style={{
-        paddingTop: 'clamp(16px, 6vw, 100px)',
-        paddingBottom: 'clamp(16px, 6vw, 100px)',
+        paddingTop: 'clamp(32px, 6vw, 100px)',
+        paddingBottom: 'clamp(32px, 6vw, 100px)',
         paddingLeft: 'clamp(24px, 6vw, 100px)',
         paddingRight: 'clamp(24px, 6vw, 100px)',
       }}
     >
-      <div className="max-w-7xl mx-auto text-center mb-14">
-        <motion.span className="inline-block text-xs font-semibold tracking-[0.2em] uppercase text-purple-400 mb-4"
-          style={{ fontFamily: 'Satoshi, sans-serif' }}
-          initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
-          Loved by Gym Owners
-        </motion.span>
-        <motion.h2 className="text-4xl md:text-5xl font-bold text-white mb-4"
-          style={{ fontFamily: 'Clash Display, sans-serif' }}
-          initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }} transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}>
-          500+ Gyms Can't Be Wrong
-        </motion.h2>
-        <motion.p className="text-white/45 text-lg max-w-xl mx-auto"
-          style={{ fontFamily: 'Satoshi, sans-serif' }}
-          initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.15 }}>
-          Real stories from real gym owners growing with Fitpulse.
-        </motion.p>
-      </div>
-
-      {/* Row 1 — left */}
-      <div className="relative overflow-hidden mb-4">
-        <div className="flex marquee-left" style={{ width: 'max-content' }}>
-          {doubled.map((t, i) => <TestimonialCard key={i} t={t} />)}
+      <div className="max-w-7xl mx-auto w-full flex flex-col items-center justify-center">
+        {/* Section Header */}
+        <div className="flex flex-col items-center justify-center text-center max-w-3xl mx-auto mb-20 w-full">
+          <motion.span className="inline-block text-xs font-semibold tracking-[0.25em] uppercase text-purple-400 mb-5"
+            style={{ fontFamily: 'Satoshi, sans-serif' }}
+            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
+            Loved by Gym Owners
+          </motion.span>
+          <motion.h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-6 tracking-tight leading-tight"
+            style={{ fontFamily: 'Clash Display, sans-serif' }}
+            initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}>
+            500+ Gyms Can't Be Wrong
+          </motion.h2>
+          <motion.p className="text-white/60 text-base sm:text-lg md:text-xl max-w-2xl mx-auto text-center leading-relaxed font-normal"
+            style={{ fontFamily: 'Satoshi, sans-serif' }}
+            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.15 }}>
+            Real stories from real gym owners growing with Fitpulse.
+          </motion.p>
         </div>
-      </div>
 
-      {/* Row 2 — right */}
-      <div className="relative overflow-hidden">
-        <div className="flex marquee-right" style={{ width: 'max-content' }}>
-          {[...doubled].reverse().map((t, i) => <TestimonialCard key={i} t={t} />)}
+        {/* Row 1 — left */}
+        <div style={{ paddingBottom: 'clamp(2px, 3vw, 50px)' }}
+          className="relative overflow-hidden mb-4">
+          <div className="flex marquee-left" style={{ width: 'max-content' }}>
+            {doubled.map((t, i) => <TestimonialCard key={i} t={t} />)}
+          </div>
         </div>
-      </div>
 
-      {/* Edge fades */}
-      <div className="absolute left-0 top-0 bottom-0 w-24 pointer-events-none z-10"
-        style={{ background: 'linear-gradient(to right, #050505, transparent)' }} />
-      <div className="absolute right-0 top-0 bottom-0 w-24 pointer-events-none z-10"
-        style={{ background: 'linear-gradient(to left, #050505, transparent)' }} />
+        {/* Row 2 — right */}
+        <div className="relative overflow-hidden">
+          <div className="flex marquee-right" style={{ width: 'max-content' }}>
+            {[...doubled].reverse().map((t, i) => <TestimonialCard key={i} t={t} />)}
+          </div>
+        </div>
+
+        {/* Edge fades */}
+        <div className="absolute left-0 top-0 bottom-0 w-24 pointer-events-none z-10"
+          style={{ background: 'linear-gradient(to right, #050505, transparent)' }} />
+        <div className="absolute right-0 top-0 bottom-0 w-24 pointer-events-none z-10"
+          style={{ background: 'linear-gradient(to left, #050505, transparent)' }} />
+      </div>
     </section>
   )
 }
