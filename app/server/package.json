@@ -1,0 +1,14 @@
+{
+  "name": "fitpulse-server",
+  "version": "1.0.0",
+  "description": "Fitpulse Gym Management SaaS - REST API",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
