@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import MagneticButton from './ui/MagneticButton'
 
+// Admin dashboard URL — change this to your production URL when deploying
+const DASHBOARD_URL = 'http://localhost:5173'
+
 const links = [
   { name: 'Features', id: 'features' },
   { name: 'Dashboard', id: 'dashboard' },
@@ -100,6 +103,7 @@ export default function Navbar() {
           <button
             className="text-white text-lg font-bold transition-all duration-300 cursor-none px-8 py-3.5 rounded-full bg-white/[0.06] border border-white/15 hover:bg-white/15 hover:border-purple-400/50 shadow-md"
             style={{ fontFamily: 'Satoshi, sans-serif' }}
+            onClick={() => window.open(`${DASHBOARD_URL}/login`, '_blank')}
           >
             Login
           </button>
@@ -152,7 +156,10 @@ export default function Navbar() {
                 </button>
               ))}
               <div className="flex flex-col gap-4 pt-4">
-                <button className="text-white text-xl font-bold py-4 rounded-2xl glass border border-white/20">
+                <button
+                  className="text-white text-xl font-bold py-4 rounded-2xl glass border border-white/20"
+                  onClick={() => { setMenuOpen(false); window.open(`${DASHBOARD_URL}/login`, '_blank') }}
+                >
                   Login
                 </button>
                 <MagneticButton variant="primary" size="xl" className="w-full justify-center text-center text-xl py-4">
