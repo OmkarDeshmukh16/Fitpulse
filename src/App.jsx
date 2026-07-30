@@ -16,9 +16,15 @@ import PricingSection from './sections/PricingSection'
 import CTASection from './sections/CTASection'
 import Footer from './sections/Footer'
 
+import BookDemoModal from './components/BookDemoModal'
+
 export default function App() {
   const [loading, setLoading] = useState(true)
+  const [isDemoModalOpen, setIsDemoModalOpen] = useState(false)
   const lenisRef = useLenis()
+
+  const handleOpenDemo = () => setIsDemoModalOpen(true)
+  const handleCloseDemo = () => setIsDemoModalOpen(false)
 
   // Prevent scroll during loading
   useEffect(() => {
@@ -52,11 +58,11 @@ export default function App() {
           <WorldScene />
 
           {/* Fixed navbar */}
-          <Navbar />
+          <Navbar onOpenDemo={handleOpenDemo} />
 
           {/* Scrollable HTML overlay */}
           <div className="relative z-10">
-            <HeroSection />
+            <HeroSection onOpenDemo={handleOpenDemo} />
 
             {/* Dark overlay sections — glass sections on top of 3D */}
             <div style={{ background: 'linear-gradient(to bottom, transparent 0%, rgba(5,5,5,0.97) 8%, rgba(5,5,5,0.97) 100%)' }}>
@@ -66,9 +72,12 @@ export default function App() {
               <TestimonialsSection />
               <PricingSection />
               <CTASection />
-              <Footer />
+              <Footer onOpenDemo={handleOpenDemo} />
             </div>
           </div>
+
+          {/* Book Demo Modal */}
+          <BookDemoModal isOpen={isDemoModalOpen} onClose={handleCloseDemo} />
         </div>
       )}
     </>

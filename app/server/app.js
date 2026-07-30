@@ -17,13 +17,14 @@ const attendanceRoutes = require('./routes/attendance.routes');
 const paymentRoutes = require('./routes/payments.routes');
 const reportRoutes = require('./routes/reports.routes');
 const settingsRoutes = require('./routes/settings.routes');
+const demoRoutes = require('./routes/demo.routes');
 
 const app = express();
 
 // Security
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: [process.env.CLIENT_URL || 'http://localhost:5173', 'http://localhost:3000'],
   credentials: true,
 }));
 
@@ -53,6 +54,7 @@ app.use('/api/attendance', attendanceRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/demo-requests', demoRoutes);
 
 // 404 handler
 app.use((req, res) => {

@@ -17,6 +17,7 @@ import AttendancePage from './pages/attendance/AttendancePage'
 import PaymentsPage from './pages/payments/PaymentsPage'
 import ReportsPage from './pages/reports/ReportsPage'
 import SettingsPage from './pages/settings/SettingsPage'
+import SuperAdminDashboardPage from './pages/superadmin/SuperAdminDashboardPage'
 
 export default function App() {
   return (
@@ -45,6 +46,7 @@ export default function App() {
           <Route element={<ProtectedRoute />}>
             <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/superadmin" element={<SuperAdminDashboardPage />} />
               <Route path="/members" element={<MembersPage />} />
               <Route path="/members/new" element={<AddMemberPage />} />
               <Route path="/plans" element={<PlansPage />} />

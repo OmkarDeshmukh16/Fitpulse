@@ -9,7 +9,7 @@ import { logout, selectGymSettings, selectCurrentUser } from '../../redux/slices
 import { toggleSidebar } from '../../redux/slices/uiSlice'
 import { useLogoutMutation } from '../../services/auth.api'
 
-const navItems = [
+const baseNavItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/members', icon: Users, label: 'Members' },
   { to: '/plans', icon: Dumbbell, label: 'Plans' },
@@ -32,6 +32,10 @@ export default function Sidebar() {
     dispatch(logout())
     navigate('/login')
   }
+
+  const navItems = user?.role === 'superadmin'
+    ? [{ to: '/superadmin', icon: Shield, label: 'Super Admin' }, ...baseNavItems]
+    : baseNavItems
 
   return (
     <motion.aside

@@ -12,7 +12,7 @@ const links = [
   { name: 'Testimonials', id: 'testimonials' },
 ]
 
-export default function Navbar() {
+export default function Navbar({ onOpenDemo }) {
   const [scrolled, setScrolled] = useState(false)
   const [hoveredIndex, setHoveredIndex] = useState(null)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -107,7 +107,7 @@ export default function Navbar() {
           >
             Login
           </button>
-          <MagneticButton variant="primary" size="xl">
+          <MagneticButton variant="primary" size="xl" onClick={onOpenDemo}>
             Book a Demo
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -162,7 +162,7 @@ export default function Navbar() {
                 >
                   Login
                 </button>
-                <MagneticButton variant="primary" size="xl" className="w-full justify-center text-center text-xl py-4">
+                <MagneticButton variant="primary" size="xl" className="w-full justify-center text-center text-xl py-4" onClick={() => { setMenuOpen(false); onOpenDemo(); }}>
                   Book a Demo
                 </MagneticButton>
               </div>

@@ -8,7 +8,7 @@ const footerLinks = {
   Legal: ['Privacy Policy', 'Terms of Service', 'Security', 'Cookie Settings'],
 }
 
-export default function Footer() {
+export default function Footer({ onOpenDemo }) {
   return (
     <footer
       id="footer"
@@ -52,7 +52,7 @@ export default function Footer() {
           >
             Ready to transform your gym operations and grow your business?
           </p>
-          <MagneticButton variant="primary" size="xl">
+          <MagneticButton variant="primary" size="xl" onClick={onOpenDemo}>
             Book a Demo
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />

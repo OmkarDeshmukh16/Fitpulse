@@ -4,7 +4,7 @@ import FloatingStatCards from '../components/ui/FloatingStatCards'
 
 const avatarColors = ['#7C3AED', '#5B21B6', '#8B5CF6', '#6D28D9']
 
-export default function HeroSection() {
+export default function HeroSection({ onOpenDemo }) {
   return (
     <section
       id="hero"
@@ -70,7 +70,7 @@ export default function HeroSection() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.85, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             >
-              <MagneticButton variant="primary" size="xl">
+              <MagneticButton variant="primary" size="xl" onClick={onOpenDemo}>
                 Book a Demo
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />

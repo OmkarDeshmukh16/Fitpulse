@@ -20,7 +20,11 @@ export default function LoginPage() {
       const res = await login(form).unwrap()
       dispatch(setCredentials(res))
       toast.success(`Welcome back, ${res.user.name}!`)
-      navigate('/dashboard')
+      if (res.user.role === 'superadmin') {
+        navigate('/superadmin')
+      } else {
+        navigate('/dashboard')
+      }
     } catch (err) {
       toast.error(err?.data?.message || 'Login failed')
     }
