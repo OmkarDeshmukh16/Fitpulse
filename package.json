@@ -4,7 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 3000",
+    "dev:server": "npm run dev --prefix app/server",
+    "dev:client": "npm run dev --prefix app/client",
+    "dev:all": "concurrently --kill-others-on-fail --names \"LANDING,CLIENT,SERVER\" --prefix-colors \"magenta,cyan,yellow\" \"npm run dev\" \"npm run dev:client\" \"npm run dev:server\"",
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview"
@@ -27,6 +30,7 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
+    "concurrently": "^10.0.4",
     "oxlint": "^1.71.0",
     "vite": "^8.1.1"
   }

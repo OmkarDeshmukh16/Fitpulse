@@ -96,7 +96,8 @@ export default function SuperAdminDashboardPage() {
 
   const handleCopyCredentials = () => {
     if (!createdCredentials) return
-    const text = `Fitpulse SaaS Gym Credentials:\nURL: http://localhost:5173/login\nEmail: ${createdCredentials.email}\nPassword: ${createdCredentials.password}`
+    const loginUrl = import.meta.env.VITE_DASHBOARD_URL ? `${import.meta.env.VITE_DASHBOARD_URL}/login` : `${window.location.origin}/login`
+    const text = `Fitpulse SaaS Gym Credentials:\nURL: ${loginUrl}\nEmail: ${createdCredentials.email}\nPassword: ${createdCredentials.password}`
     navigator.clipboard.writeText(text)
     setCopied(true)
     toast.success('Credentials copied to clipboard!')
@@ -413,7 +414,7 @@ export default function SuperAdminDashboardPage() {
 
                 <div className="card" style={{ background: 'var(--color-bg-secondary)', padding: '1rem' }}>
                   <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Login URL:</div>
-                  <div style={{ fontFamily: 'monospace', fontWeight: 600, color: 'var(--color-accent)', marginBottom: '0.75rem' }}>http://localhost:5173/login</div>
+                  <div style={{ fontFamily: 'monospace', fontWeight: 600, color: 'var(--color-accent)', marginBottom: '0.75rem' }}>{import.meta.env.VITE_DASHBOARD_URL ? `${import.meta.env.VITE_DASHBOARD_URL}/login` : `${window.location.origin}/login`}</div>
 
                   <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginBottom: '0.25rem' }}>Gym Owner Email:</div>
                   <div style={{ fontFamily: 'monospace', fontWeight: 600, marginBottom: '0.75rem' }}>{createdCredentials.email}</div>

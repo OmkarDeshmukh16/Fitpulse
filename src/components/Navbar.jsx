@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import MagneticButton from './ui/MagneticButton'
 
-// Admin dashboard URL — change this to your production URL when deploying
-const DASHBOARD_URL = 'http://localhost:5173'
+// Set VITE_DASHBOARD_URL in Vercel env vars to your deployed admin dashboard URL
+const DASHBOARD_URL = import.meta.env.VITE_DASHBOARD_URL || 'http://localhost:5173'
 
 const links = [
   { name: 'Features', id: 'features' },
