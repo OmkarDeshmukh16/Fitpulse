@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { Toaster } from 'react-hot-toast'
@@ -19,6 +20,9 @@ import ReportsPage from './pages/reports/ReportsPage'
 import SettingsPage from './pages/settings/SettingsPage'
 import SuperAdminDashboardPage from './pages/superadmin/SuperAdminDashboardPage'
 
+// Lazy-load the landing page so Three.js/3D bundle doesn't affect dashboard load time
+const LandingPage = lazy(() => import('./pages/landing/LandingPage'))
+
 export default function App() {
   return (
     <Provider store={store}>
@@ -38,6 +42,16 @@ export default function App() {
           }}
         />
         <Routes>
+          {/* Landing page — loaded lazily so 3D assets don't bloat admin bundle */}
+          <Route
+            path="/"
+            element={
+              <Suspense fallback={<div style={{ background: '#050505', minHeight: '100vh' }} />}>
+                <LandingPage />
+              </Suspense>
+            }
+          />
+
           {/* Public routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
@@ -57,9 +71,8 @@ export default function App() {
             </Route>
           </Route>
 
-          {/* Default redirect */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </Provider>

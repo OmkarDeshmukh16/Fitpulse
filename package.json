@@ -4,13 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --port 3000",
     "dev:server": "npm run dev --prefix app/server",
     "dev:client": "npm run dev --prefix app/client",
-    "dev:all": "concurrently --kill-others-on-fail --names \"LANDING,CLIENT,SERVER\" --prefix-colors \"magenta,cyan,yellow\" \"npm run dev\" \"npm run dev:client\" \"npm run dev:server\"",
-    "build": "vite build",
-    "lint": "oxlint",
-    "preview": "vite preview"
+    "dev:all": "concurrently --kill-others-on-fail --names \"CLIENT,SERVER\" --prefix-colors \"cyan,yellow\" \"npm run dev:client\" \"npm run dev:server\"",
+    "build": "npm run build --prefix app/client",
+    "lint": "oxlint"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",
