@@ -2,8 +2,13 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import MagneticButton from './ui/MagneticButton'
 
-// Set VITE_DASHBOARD_URL in Vercel env vars to your deployed admin dashboard URL
-const DASHBOARD_URL = import.meta.env.VITE_DASHBOARD_URL || 'http://localhost:5173'
+// VITE_DASHBOARD_URL is optional when landing and dashboard are hosted together
+const getDashboardUrl = () => {
+  if (import.meta.env.VITE_DASHBOARD_URL) {
+    return import.meta.env.VITE_DASHBOARD_URL
+  }
+  return typeof window !== 'undefined' ? window.location.origin : ''
+}
 
 const links = [
   { name: 'Features', id: 'features' },
@@ -103,7 +108,14 @@ export default function Navbar({ onOpenDemo }) {
           <button
             className="text-white text-lg font-bold transition-all duration-300 cursor-none px-8 py-3.5 rounded-full bg-white/[0.06] border border-white/15 hover:bg-white/15 hover:border-purple-400/50 shadow-md"
             style={{ fontFamily: 'Satoshi, sans-serif' }}
-            onClick={() => window.open(`${DASHBOARD_URL}/login`, '_blank')}
+            onClick={() => {
+              const url = getDashboardUrl()
+              if (import.meta.env.VITE_DASHBOARD_URL) {
+                window.open(`${url}/login`, '_blank')
+              } else {
+                window.location.href = `${url}/login`
+              }
+            }}
           >
             Login
           </button>
@@ -158,7 +170,15 @@ export default function Navbar({ onOpenDemo }) {
               <div className="flex flex-col gap-4 pt-4">
                 <button
                   className="text-white text-xl font-bold py-4 rounded-2xl glass border border-white/20"
-                  onClick={() => { setMenuOpen(false); window.open(`${DASHBOARD_URL}/login`, '_blank') }}
+                  onClick={() => {
+                    setMenuOpen(false)
+                    const url = getDashboardUrl()
+                    if (import.meta.env.VITE_DASHBOARD_URL) {
+                      window.open(`${url}/login`, '_blank')
+                    } else {
+                      window.location.href = `${url}/login`
+                    }
+                  }}
                 >
                   Login
                 </button>
