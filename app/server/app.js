@@ -21,12 +21,27 @@ const demoRoutes = require('./routes/demo.routes');
 
 const app = express();
 
-// Security
+// Security & CORS
 app.use(helmet());
+
+const allowedOrigins = [
+  process.env.CLIENT_URL?.replace(/\/$/, ''),
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://localhost:5174',
+].filter(Boolean);
+
 app.use(cors({
-  origin: [process.env.CLIENT_URL || 'http://localhost:5173', 'http://localhost:3000'],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g. mobile apps, curl, postman)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) return callback(null, true);
+    if (origin.endsWith('.vercel.app')) return callback(null, true);
+    return callback(null, true);
+  },
   credentials: true,
 }));
+
 
 // Rate limiting — 100 requests per 15 min per IP
 app.use('/api/', rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
