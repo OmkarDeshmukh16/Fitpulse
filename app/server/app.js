@@ -57,7 +57,8 @@ if (process.env.NODE_ENV !== 'production') {
   app.use(morgan('dev'));
 }
 
-// Health check
+// Root & Health check
+app.get('/', (req, res) => res.json({ success: true, message: '🚀 Fitpulse Gym Management SaaS API is running successfully' }));
 app.get('/health', (req, res) => res.json({ status: 'ok', service: 'fitpulse-api' }));
 
 // API routes
