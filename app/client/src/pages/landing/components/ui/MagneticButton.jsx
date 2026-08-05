@@ -34,10 +34,10 @@ export default function MagneticButton({
   }, [x, y, innerX, innerY])
 
   const sizeClasses = {
-    sm: 'px-5 py-2.5 text-sm font-semibold gap-2',
-    md: 'px-7 py-3.5 text-base font-semibold gap-2.5',
-    lg: 'px-9 py-4 text-base md:text-lg font-bold gap-3',
-    xl: 'px-11 py-5 text-lg md:text-xl font-bold gap-3.5',
+    sm: 'px-4 py-2 text-xs font-semibold gap-1.5',
+    md: 'px-5 py-2.5 text-sm font-semibold gap-2',
+    lg: 'px-7 py-3 text-sm md:text-base font-bold gap-2.5',
+    xl: 'px-8 py-3.5 text-base md:text-lg font-bold gap-3',
   }
 
   const baseClass = `relative inline-flex items-center justify-center rounded-full overflow-hidden transition-all duration-300 ${sizeClasses[size] || sizeClasses.lg}`
