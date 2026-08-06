@@ -2,8 +2,12 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Dumbbell, X, CheckCircle2, Loader2, Sparkles, Building2, User, Mail, Phone, MapPin, Users } from 'lucide-react'
 
-// Set VITE_API_URL in Vercel env vars to your deployed backend URL (e.g. https://fitpulse-api.onrender.com/api)
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+const getApiBaseUrl = () => {
+  const envUrl = (import.meta.env.VITE_API_URL || '/api').trim().replace(/\/$/, '')
+  if (envUrl.endsWith('/api')) return envUrl
+  return `${envUrl}/api`
+}
+const API_BASE_URL = getApiBaseUrl()
 
 export default function BookDemoModal({ isOpen, onClose }) {
   const [form, setForm] = useState({

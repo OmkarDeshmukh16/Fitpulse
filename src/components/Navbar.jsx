@@ -30,53 +30,54 @@ export default function Navbar({ onOpenDemo }) {
 
   return (
     <motion.header
-      className="fixed top-0 left-0 right-0 z-[100] py-6 md:py-8 flex justify-center items-center w-full"
-      style={{
-        paddingLeft: 'clamp(24px, 6vw, 100px)',
-        paddingRight: 'clamp(24px, 6vw, 100px)',
-      }}
+      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${
+        scrolled
+          ? 'bg-[rgba(5,5,5,0.85)] backdrop-blur-xl border-b border-white/[0.06] shadow-[0_4px_30px_rgba(0,0,0,0.6)]'
+          : 'bg-transparent'
+      }`}
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
     >
       <div
-        className={`max-w-7xl w-full mx-auto flex items-center justify-between px-8 sm:px-12 py-5 md:py-6 rounded-3xl md:rounded-full transition-all duration-500 ${
-          scrolled
-            ? 'glass-strong shadow-[0_30px_90px_rgba(0,0,0,0.8),0_0_50px_rgba(124,58,237,0.2)] border border-white/20'
-            : 'glass border border-white/12 shadow-[0_12px_40px_rgba(0,0,0,0.5)]'
-        }`}
+        className="max-w-7xl w-full mx-auto flex items-center justify-between"
+        style={{
+          height: 28,
+          paddingLeft: 'clamp(8px, 1.5vw, 28px)',
+          paddingRight: 'clamp(8px, 1.5vw, 28px)',
+        }}
       >
         {/* Brand Logo */}
         <motion.div
-          className="flex items-center gap-4 cursor-none"
-          whileHover={{ scale: 1.05 }}
+          className="flex items-center gap-2.5 cursor-none flex-shrink-0"
+          whileHover={{ scale: 1.03 }}
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         >
           <div
-            className="w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(124,58,237,0.6)] border border-purple-400/40"
+            className="w-6 h-6 rounded-md flex items-center justify-center shadow-[0_0_10px_rgba(124,58,237,0.35)] border border-purple-400/25"
             style={{ background: 'linear-gradient(135deg, #7C3AED, #4C1D95)' }}
           >
-            <svg viewBox="0 0 24 24" className="w-6 h-6 text-white fill-white">
+            <svg viewBox="0 0 24 24" className="w-2.5 h-2.5 text-white fill-white">
               <rect x="2" y="10" width="20" height="4" rx="2" />
               <rect x="0" y="7" width="5" height="10" rx="2" />
               <rect x="19" y="7" width="5" height="10" rx="2" />
             </svg>
           </div>
           <span
-            className="text-white font-extrabold text-2xl sm:text-3xl md:text-4xl tracking-tight"
-            style={{ fontFamily: 'Clash Display, sans-serif' }}
+            className="text-white font-bold text-sm tracking-tight"
+            style={{ fontFamily: 'Clash Display, sans-serif', letterSpacing: '-0.01em' }}
           >
             Fit<span className="text-purple-400">pulse</span>
           </span>
         </motion.div>
 
-        {/* Desktop Navigation Links — Modern Floating Glass Segmented Tabs */}
-        <nav className="hidden md:flex items-center gap-3 lg:gap-4 p-2 rounded-full bg-white/[0.03] border border-white/10 backdrop-blur-xl relative">
+        {/* Desktop Navigation Links — Plain transparent links, centered */}
+        <nav className="hidden md:flex items-center gap-4 lg:gap-6 absolute left-1/2 -translate-x-1/2">
           {links.map((link, idx) => (
             <button
               key={link.name}
-              className={`relative z-10 text-lg font-bold px-6 py-3 rounded-full transition-all duration-300 cursor-none flex items-center gap-2 ${
-                hoveredIndex === idx ? 'text-white' : 'text-white/70 hover:text-white'
+              className={`relative text-[12px] font-medium transition-all duration-300 cursor-none group ${
+                hoveredIndex === idx ? 'text-white' : 'text-white/60 hover:text-white'
               }`}
               style={{ fontFamily: 'Satoshi, sans-serif' }}
               onMouseEnter={() => setHoveredIndex(idx)}
@@ -86,27 +87,17 @@ export default function Navbar({ onOpenDemo }) {
                 el?.scrollIntoView({ behavior: 'smooth' })
               }}
             >
-              <span>{link.name}</span>
-
-              {/* Sliding glass pill backdrop on hover */}
-              {hoveredIndex === idx && (
-                <motion.div
-                  layoutId="hover-pill"
-                  className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-600/30 to-purple-800/30 border border-purple-500/50 shadow-[0_0_25px_rgba(124,58,237,0.4)] pointer-events-none -z-10"
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                />
-              )}
+              {link.name}
+              {/* Subtle underline on hover */}
+              <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-purple-400 group-hover:w-full transition-all duration-300" />
             </button>
           ))}
         </nav>
 
         {/* Right CTA Actions */}
-        <div className="hidden md:flex items-center gap-6">
+        <div className="hidden md:flex items-center gap-3 flex-shrink-0">
           <button
-            className="text-white text-lg font-bold transition-all duration-300 cursor-none px-8 py-3.5 rounded-full bg-white/[0.06] border border-white/15 hover:bg-white/15 hover:border-purple-400/50 shadow-md"
+            className="text-white/65 text-[12px] font-medium hover:text-white transition-colors duration-200 cursor-none"
             style={{ fontFamily: 'Satoshi, sans-serif' }}
             onClick={() => {
               const url = getDashboardUrl()
@@ -119,20 +110,17 @@ export default function Navbar({ onOpenDemo }) {
           >
             Login
           </button>
-          <MagneticButton variant="primary" size="xl" onClick={onOpenDemo}>
+          <MagneticButton variant="primary" size="xs" onClick={onOpenDemo}>
             Book a Demo
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
           </MagneticButton>
         </div>
 
         {/* Mobile Hamburger Button */}
         <button
-          className="md:hidden text-white cursor-none p-3 rounded-2xl bg-white/[0.08] border border-white/15"
+          className="md:hidden text-white cursor-none p-2 rounded-xl bg-white/[0.08] border border-white/15"
           onClick={() => setMenuOpen(!menuOpen)}
         >
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -152,11 +140,11 @@ export default function Navbar({ onOpenDemo }) {
             exit={{ opacity: 0, y: -10, height: 0 }}
             className="md:hidden overflow-hidden glass-strong mt-4 rounded-3xl max-w-7xl w-full mx-auto border border-white/20 shadow-2xl"
           >
-            <div className="flex flex-col p-8 gap-6">
+            <div className="flex flex-col p-6 gap-4">
               {links.map((link) => (
                 <button
                   key={link.name}
-                  className="text-white text-2xl font-bold text-left py-3 border-b border-white/10 cursor-none flex items-center justify-between"
+                  className="text-white text-xl font-bold text-left py-3 border-b border-white/10 cursor-none flex items-center justify-between"
                   style={{ fontFamily: 'Satoshi, sans-serif' }}
                   onClick={() => {
                     setMenuOpen(false)
@@ -169,7 +157,7 @@ export default function Navbar({ onOpenDemo }) {
               ))}
               <div className="flex flex-col gap-4 pt-4">
                 <button
-                  className="text-white text-xl font-bold py-4 rounded-2xl glass border border-white/20"
+                  className="text-white text-base font-semibold py-3 rounded-2xl glass border border-white/20"
                   onClick={() => {
                     setMenuOpen(false)
                     const url = getDashboardUrl()

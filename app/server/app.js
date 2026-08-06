@@ -61,6 +61,14 @@ if (process.env.NODE_ENV !== 'production') {
 app.get('/', (req, res) => res.json({ success: true, message: '🚀 Fitpulse Gym Management SaaS API is running successfully' }));
 app.get('/health', (req, res) => res.json({ status: 'ok', service: 'fitpulse-api' }));
 
+// Auto-prefix /api if omitted in incoming request
+app.use((req, res, next) => {
+  if (!req.path.startsWith('/api') && req.path !== '/' && req.path !== '/health') {
+    req.url = '/api' + req.url;
+  }
+  next();
+});
+
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);

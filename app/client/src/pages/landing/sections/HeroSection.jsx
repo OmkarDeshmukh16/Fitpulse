@@ -8,12 +8,12 @@ export default function HeroSection({ onOpenDemo }) {
   return (
     <section
       id="hero"
-      className="relative min-h-screen flex items-center z-10 overflow-hidden"
+      className="relative min-h-[calc(100vh-4rem)] flex items-center z-10 overflow-hidden"
       style={{
-        paddingTop: 120,
-        paddingBottom: 'clamp(24px, 6vw, 100px)',
-        paddingLeft: 'clamp(24px, 6vw, 100px)',
-        paddingRight: 'clamp(24px, 6vw, 100px)',
+        paddingTop: 80,
+        paddingBottom: 'clamp(24px, 6vw, 80px)',
+        paddingLeft: 'clamp(20px, 5vw, 80px)',
+        paddingRight: 'clamp(20px, 5vw, 80px)',
       }}
     >
       <div className="max-w-7xl mx-auto w-full">
@@ -39,7 +39,7 @@ export default function HeroSection({ onOpenDemo }) {
 
             {/* Headline */}
             <motion.h1
-              className="text-5xl sm:text-6xl md:text-7xl xl:text-8xl font-bold leading-[1.02] tracking-tight text-white"
+              className="text-4xl sm:text-5xl md:text-5xl xl:text-6xl font-bold leading-[1.05] tracking-tight text-white"
               style={{ fontFamily: 'Clash Display, sans-serif' }}
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -53,7 +53,7 @@ export default function HeroSection({ onOpenDemo }) {
 
             {/* Subtitle */}
             <motion.p
-              className="text-lg md:text-xl leading-relaxed text-white/60 max-w-xl font-normal"
+              className="text-base md:text-lg leading-relaxed text-white/70 max-w-xl font-normal"
               style={{ fontFamily: 'Satoshi, sans-serif' }}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -65,18 +65,18 @@ export default function HeroSection({ onOpenDemo }) {
 
             {/* Buttons */}
             <motion.div
-              className="flex flex-wrap gap-5 pt-3"
+              className="flex flex-wrap gap-4 pt-3"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.85, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             >
-              <MagneticButton variant="primary" size="xl" onClick={onOpenDemo}>
+              <MagneticButton variant="primary" size="md" onClick={onOpenDemo}>
                 Book a Demo
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
               </MagneticButton>
-              <MagneticButton variant="ghost" size="xl">
+              <MagneticButton variant="ghost" size="md">
                 Explore Features
               </MagneticButton>
             </motion.div>
@@ -131,7 +131,7 @@ export default function HeroSection({ onOpenDemo }) {
                 { value: '99.9%', label: 'Uptime SLA' },
               ].map((s) => (
                 <div key={s.label}>
-                  <div className="text-white font-bold text-xl md:text-2xl" style={{ fontFamily: 'Clash Display, sans-serif' }}>{s.value}</div>
+                  <div className="text-white font-bold text-lg md:text-xl" style={{ fontFamily: 'Clash Display, sans-serif' }}>{s.value}</div>
                   <div className="text-white/40 text-xs md:text-sm mt-0.5" style={{ fontFamily: 'Satoshi, sans-serif' }}>{s.label}</div>
                 </div>
               ))}

@@ -24,20 +24,20 @@ export default function Navbar({ onOpenDemo }) {
 
   return (
     <motion.header
-      className="fixed top-0 left-0 right-0 z-[100] py-6 md:py-8 flex justify-center items-center w-full"
+      className="fixed top-0 left-0 right-0 z-[100] py-3 md:py-4 flex justify-center items-center w-full"
       style={{
-        paddingLeft: 'clamp(24px, 6vw, 100px)',
-        paddingRight: 'clamp(24px, 6vw, 100px)',
+        paddingLeft: 'clamp(12px, 3vw, 60px)',
+        paddingRight: 'clamp(12px, 3vw, 60px)',
       }}
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
     >
       <div
-        className={`max-w-7xl w-full mx-auto flex items-center justify-between px-8 sm:px-12 py-5 md:py-6 rounded-3xl md:rounded-full transition-all duration-500 ${
+        className={`max-w-7xl w-full mx-auto flex items-center justify-between px-4 sm:px-6 py-3 md:py-4 rounded-2xl transition-all duration-500 ${
           scrolled
-            ? 'glass-strong shadow-[0_30px_90px_rgba(0,0,0,0.8),0_0_50px_rgba(124,58,237,0.2)] border border-white/20'
-            : 'glass border border-white/12 shadow-[0_12px_40px_rgba(0,0,0,0.5)]'
+            ? 'glass-strong shadow-[0_24px_70px_rgba(0,0,0,0.7),0_0_35px_rgba(124,58,237,0.18)] border border-white/20'
+            : 'glass border border-white/12 shadow-[0_10px_30px_rgba(0,0,0,0.4)]'
         }`}
       >
         {/* Brand Logo */}
@@ -47,17 +47,17 @@ export default function Navbar({ onOpenDemo }) {
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         >
           <div
-            className="w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center shadow-[0_0_30px_rgba(124,58,237,0.6)] border border-purple-400/40"
+            className="w-9 h-9 md:w-10 md:h-10 rounded-2xl flex items-center justify-center shadow-[0_0_18px_rgba(124,58,237,0.45)] border border-purple-400/40"
             style={{ background: 'linear-gradient(135deg, #7C3AED, #4C1D95)' }}
           >
-            <svg viewBox="0 0 24 24" className="w-6 h-6 text-white fill-white">
+            <svg viewBox="0 0 24 24" className="w-5 h-5 text-white fill-white">
               <rect x="2" y="10" width="20" height="4" rx="2" />
               <rect x="0" y="7" width="5" height="10" rx="2" />
               <rect x="19" y="7" width="5" height="10" rx="2" />
             </svg>
           </div>
           <span
-            className="text-white font-extrabold text-2xl sm:text-3xl md:text-4xl tracking-tight"
+            className="text-white font-extrabold text-base sm:text-lg md:text-xl tracking-tight"
             style={{ fontFamily: 'Clash Display, sans-serif' }}
           >
             Fit<span className="text-purple-400">pulse</span>
@@ -65,11 +65,11 @@ export default function Navbar({ onOpenDemo }) {
         </motion.div>
 
         {/* Desktop Navigation Links — Modern Floating Glass Segmented Tabs */}
-        <nav className="hidden md:flex items-center gap-3 lg:gap-4 p-2 rounded-full bg-white/[0.03] border border-white/10 backdrop-blur-xl relative">
+        <nav className="hidden md:flex items-center gap-2 lg:gap-3 p-1 rounded-full bg-white/[0.03] border border-white/10 backdrop-blur-xl relative">
           {links.map((link, idx) => (
             <button
               key={link.name}
-              className={`relative z-10 text-lg font-bold px-6 py-3 rounded-full transition-all duration-300 cursor-none flex items-center gap-2 ${
+              className={`relative z-10 text-sm font-semibold px-4 py-2 rounded-full transition-all duration-300 cursor-none flex items-center gap-2 ${
                 hoveredIndex === idx ? 'text-white' : 'text-white/70 hover:text-white'
               }`}
               style={{ fontFamily: 'Satoshi, sans-serif' }}
@@ -98,17 +98,17 @@ export default function Navbar({ onOpenDemo }) {
         </nav>
 
         {/* Right CTA Actions */}
-        <div className="hidden md:flex items-center gap-6">
+        <div className="hidden md:flex items-center gap-4">
           <button
-            className="text-white text-lg font-bold transition-all duration-300 cursor-none px-8 py-3.5 rounded-full bg-white/[0.06] border border-white/15 hover:bg-white/15 hover:border-purple-400/50 shadow-md"
+            className="text-white text-sm font-semibold transition-all duration-300 cursor-none px-4 py-2.5 rounded-full bg-white/[0.06] border border-white/15 hover:bg-white/15 hover:border-purple-400/50 shadow-sm"
             style={{ fontFamily: 'Satoshi, sans-serif' }}
             onClick={() => navigate('/login')}
           >
             Login
           </button>
-          <MagneticButton variant="primary" size="xl" onClick={onOpenDemo}>
+          <MagneticButton variant="primary" size="md" onClick={onOpenDemo}>
             Book a Demo
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
           </MagneticButton>
@@ -116,10 +116,10 @@ export default function Navbar({ onOpenDemo }) {
 
         {/* Mobile Hamburger Button */}
         <button
-          className="md:hidden text-white cursor-none p-3 rounded-2xl bg-white/[0.08] border border-white/15"
+          className="md:hidden text-white cursor-none p-2 rounded-2xl bg-white/[0.08] border border-white/15"
           onClick={() => setMenuOpen(!menuOpen)}
         >
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -139,11 +139,11 @@ export default function Navbar({ onOpenDemo }) {
             exit={{ opacity: 0, y: -10, height: 0 }}
             className="md:hidden overflow-hidden glass-strong mt-4 rounded-3xl max-w-7xl w-full mx-auto border border-white/20 shadow-2xl"
           >
-            <div className="flex flex-col p-8 gap-6">
+            <div className="flex flex-col p-4 gap-3">
               {links.map((link) => (
                 <button
                   key={link.name}
-                  className="text-white text-2xl font-bold text-left py-3 border-b border-white/10 cursor-none flex items-center justify-between"
+                  className="text-white text-lg font-semibold text-left py-3 border-b border-white/10 cursor-none flex items-center justify-between"
                   style={{ fontFamily: 'Satoshi, sans-serif' }}
                   onClick={() => {
                     setMenuOpen(false)
@@ -154,9 +154,9 @@ export default function Navbar({ onOpenDemo }) {
                   <span className="text-purple-400 text-lg">→</span>
                 </button>
               ))}
-              <div className="flex flex-col gap-4 pt-4">
+              <div className="flex flex-col gap-3 pt-3">
                 <button
-                  className="text-white text-xl font-bold py-4 rounded-2xl glass border border-white/20"
+                  className="text-white text-base font-semibold py-3 rounded-2xl glass border border-white/20"
                   onClick={() => { setMenuOpen(false); navigate('/login') }}
                 >
                   Login

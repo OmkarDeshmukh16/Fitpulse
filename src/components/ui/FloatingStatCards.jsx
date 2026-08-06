@@ -54,9 +54,9 @@ export default function FloatingStatCards() {
       {cards.map((card, i) => (
         <motion.div
           key={card.label}
-          className="absolute glass rounded-2xl p-4 cursor-none pointer-events-auto"
+          className="absolute glass rounded-[20px] p-4 cursor-none pointer-events-auto"
           style={{
-            width: i === 0 ? 200 : 172,
+            width: i === 0 ? 240 : 210,
             top: i === 0 ? '8%' : i === 1 ? '2%' : i === 2 ? '55%' : '62%',
             right: i === 0 ? '5%' : i === 1 ? '42%' : i === 2 ? '2%' : '40%',
             boxShadow: '0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.06)',

@@ -1,8 +1,14 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import { updateToken, logout } from '../redux/slices/authSlice'
 
+const getApiBaseUrl = () => {
+  const envUrl = (import.meta.env.VITE_API_URL || '/api').trim().replace(/\/$/, '')
+  if (envUrl.endsWith('/api')) return envUrl
+  return `${envUrl}/api`
+}
+
 const baseQuery = fetchBaseQuery({
-  baseUrl: import.meta.env.VITE_API_URL || '/api',
+  baseUrl: getApiBaseUrl(),
   prepareHeaders: (headers, { getState }) => {
     const token = getState().auth.accessToken
     if (token) headers.set('Authorization', `Bearer ${token}`)

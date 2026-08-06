@@ -19,8 +19,12 @@ import {
   ChevronRight
 } from 'lucide-react'
 
-// Set VITE_API_URL in Vercel env vars to your deployed backend URL (e.g. https://fitpulse-api.onrender.com/api)
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api'
+const getApiBaseUrl = () => {
+  const envUrl = (import.meta.env.VITE_API_URL || '/api').trim().replace(/\/$/, '')
+  if (envUrl.endsWith('/api')) return envUrl
+  return `${envUrl}/api`
+}
+const API_BASE_URL = getApiBaseUrl()
 
 const MEMBER_TIERS = [
   { label: '< 100', value: '<100' },
