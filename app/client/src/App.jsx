@@ -13,6 +13,8 @@ import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
 import DashboardPage from './pages/dashboard/DashboardPage'
 import MembersPage from './pages/members/MembersPage'
 import AddMemberPage from './pages/members/AddMemberPage'
+import MemberDetailPage from './pages/members/MemberDetailPage'
+import EditMemberPage from './pages/members/EditMemberPage'
 import PlansPage from './pages/plans/PlansPage'
 import AttendancePage from './pages/attendance/AttendancePage'
 import PaymentsPage from './pages/payments/PaymentsPage'
@@ -63,6 +65,8 @@ export default function App() {
               <Route path="/superadmin" element={<SuperAdminDashboardPage />} />
               <Route path="/members" element={<MembersPage />} />
               <Route path="/members/new" element={<AddMemberPage />} />
+              <Route path="/members/:id" element={<MemberDetailPage />} />
+              <Route path="/members/:id/edit" element={<EditMemberPage />} />
               <Route path="/plans" element={<PlansPage />} />
               <Route path="/attendance" element={<AttendancePage />} />
               <Route path="/payments" element={<PaymentsPage />} />
