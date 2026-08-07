@@ -9,6 +9,8 @@ import { apiSlice } from '../../services/apiSlice'
 import { useSelector } from 'react-redux'
 import { selectGymSettings } from '../../redux/slices/authSlice'
 
+import toast from 'react-hot-toast'
+
 const chartStyle = {
   contentStyle: { background: '#12122a', border: '1px solid #1e1e38', borderRadius: 10, color: '#f1f5f9', fontSize: 12 },
 }
@@ -42,9 +44,35 @@ export default function ReportsPage() {
   const attendanceChart = (attendanceData?.data || []).map(d => ({ name: d._id?.slice(5), count: d.count }))
   const revSummary = revenueData?.summary || {}
 
-  const handleExport = (fmt) => {
-    const params = new URLSearchParams({ format: fmt, ...dateRange })
-    window.open(`/api/reports/export/payments?${params}`, '_blank')
+  const handleExport = async (fmt) => {
+    try {
+      const token = localStorage.getItem('accessToken')
+      const envUrl = (import.meta.env.VITE_API_URL || '/api').trim().replace(/\/$/, '')
+      const baseUrl = envUrl.endsWith('/api') ? envUrl : `${envUrl}/api`
+      const params = new URLSearchParams({ format: fmt, ...dateRange })
+      const response = await fetch(`${baseUrl}/reports/export/payments?${params}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ message: 'Export failed' }))
+        toast.error(err.message || 'Failed to export report')
+        return
+      }
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `payments.${fmt === 'excel' ? 'xlsx' : 'csv'}`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      window.URL.revokeObjectURL(url)
+      toast.success(`Exported ${fmt.toUpperCase()} successfully`)
+    } catch (err) {
+      toast.error(`Failed to export ${fmt.toUpperCase()}`)
+    }
   }
 
   return (

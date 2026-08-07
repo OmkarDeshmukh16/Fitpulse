@@ -91,6 +91,36 @@ export default function PaymentsPage() {
   const payments = data?.data || []
   const pagination = data?.pagination || {}
 
+  const handleDownloadReceipt = async (paymentId, invoiceNumber) => {
+    try {
+      const token = localStorage.getItem('accessToken')
+      const envUrl = (import.meta.env.VITE_API_URL || '/api').trim().replace(/\/$/, '')
+      const baseUrl = envUrl.endsWith('/api') ? envUrl : `${envUrl}/api`
+      const response = await fetch(`${baseUrl}/payments/${paymentId}/receipt`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ message: 'Download failed' }))
+        toast.error(err.message || 'Failed to download receipt')
+        return
+      }
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `receipt-${invoiceNumber || paymentId}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      window.URL.revokeObjectURL(url)
+      toast.success('Receipt downloaded')
+    } catch (err) {
+      toast.error('Failed to download receipt')
+    }
+  }
+
   return (
     <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       <div className="page-header">
@@ -149,11 +179,14 @@ export default function PaymentsPage() {
                     <td style={{ fontSize: '0.8rem' }}>{p.date ? format(new Date(p.date), 'dd MMM yyyy') : '—'}</td>
                     <td><span className={`badge badge-${p.status}`}>{p.status}</span></td>
                     <td>
-                      <a href={`/api/payments/${p._id}/receipt`} target="_blank" rel="noreferrer">
-                        <button className="btn btn-ghost" style={{ padding: '0.3rem', color: 'var(--color-accent)' }} title="Download Receipt">
-                          <Receipt size={15} />
-                        </button>
-                      </a>
+                      <button
+                        className="btn btn-ghost"
+                        style={{ padding: '0.3rem', color: 'var(--color-accent)' }}
+                        title="Download Receipt"
+                        onClick={() => handleDownloadReceipt(p._id, p.invoiceNumber)}
+                      >
+                        <Receipt size={15} />
+                      </button>
                     </td>
                   </tr>
                 ))}
