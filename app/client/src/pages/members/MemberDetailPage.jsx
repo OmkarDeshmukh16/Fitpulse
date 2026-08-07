@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { ArrowLeft, Edit, Phone, Mail, Calendar, User, Snowflake, Trash2, MapPin, HeartPulse, Shield, CreditCard, Clock } from 'lucide-react'
+import { ArrowLeft, Edit, Phone, Mail, Calendar, User, Snowflake, MapPin, HeartPulse, Shield, CreditCard, Clock } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
 import {
@@ -9,7 +9,6 @@ import {
   useGetMemberPaymentsQuery,
   useFreezeMembershipMutation,
   useUnfreezeMembershipMutation,
-  useDeleteMemberMutation,
 } from '../../services/members.api'
 
 const statusBadge = (status) => {
@@ -28,7 +27,6 @@ export default function MemberDetailPage() {
 
   const [freezeMembership] = useFreezeMembershipMutation()
   const [unfreezeMembership] = useUnfreezeMembershipMutation()
-  const [deleteMember] = useDeleteMemberMutation()
 
   const member = memberRes?.data || null
   const attendance = attendanceRes?.data || []
@@ -46,18 +44,6 @@ export default function MemberDetailPage() {
       }
     } catch (err) {
       toast.error(err?.data?.message || 'Action failed')
-    }
-  }
-
-  const handleDelete = async () => {
-    if (!member) return
-    if (!window.confirm(`Delete member "${member.fullName}"? This action cannot be undone.`)) return
-    try {
-      await deleteMember(id).unwrap()
-      toast.success('Member deleted successfully')
-      navigate('/members')
-    } catch (err) {
-      toast.error(err?.data?.message || 'Failed to delete member')
     }
   }
 
@@ -115,10 +101,6 @@ export default function MemberDetailPage() {
               <Snowflake size={16} /> Unfreeze Membership
             </button>
           )}
-
-          <button className="btn btn-ghost" style={{ color: 'var(--color-danger)', padding: '0.5rem 0.75rem' }} onClick={handleDelete} title="Delete Member">
-            <Trash2 size={16} />
-          </button>
         </div>
       </div>
 

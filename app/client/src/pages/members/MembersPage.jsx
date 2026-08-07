@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Plus, Search, Filter, UserCheck, UserX, Eye, Edit, Trash2, Download, Snowflake } from 'lucide-react'
+import { Plus, Search, Filter, UserCheck, UserX, Eye, Edit, Download, Snowflake } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { useGetMembersQuery, useDeleteMemberMutation, useFreezeMembershipMutation } from '../../services/members.api'
+import { useGetMembersQuery, useFreezeMembershipMutation } from '../../services/members.api'
 import { format } from 'date-fns'
 
 const statusBadge = (status) => {
@@ -15,22 +15,11 @@ export default function MembersPage() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [page, setPage] = useState(1)
-  const [deleteMember] = useDeleteMemberMutation()
   const [freezeMembership] = useFreezeMembershipMutation()
 
   const { data, isLoading } = useGetMembersQuery({ search, status: statusFilter, page, limit: 15 })
   const members = data?.data || []
   const pagination = data?.pagination || {}
-
-  const handleDelete = async (id, name) => {
-    if (!window.confirm(`Delete member "${name}"? This cannot be undone.`)) return
-    try {
-      await deleteMember(id).unwrap()
-      toast.success('Member deleted')
-    } catch (err) {
-      toast.error(err?.data?.message || 'Failed to delete')
-    }
-  }
 
   const handleFreeze = async (id) => {
     try {
@@ -140,9 +129,6 @@ export default function MembersPage() {
                             <Snowflake size={15} />
                           </button>
                         )}
-                        <button className="btn btn-ghost" style={{ padding: '0.375rem', color: 'var(--color-danger)' }} title="Delete" onClick={() => handleDelete(m._id, m.fullName)}>
-                          <Trash2 size={15} />
-                        </button>
                       </div>
                     </td>
                   </motion.tr>
