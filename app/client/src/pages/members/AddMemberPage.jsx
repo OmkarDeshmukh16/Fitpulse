@@ -28,7 +28,7 @@ export default function AddMemberPage() {
   const [form, setForm] = useState({
     fullName: '', gender: 'male', dob: '', phone: '', email: '', address: '',
     bloodGroup: '', medicalConditions: '', emergencyContact: { name: '', phone: '', relation: '' },
-    notes: '',
+    notes: '', planId: '', password: '',
   })
   const [errors, setErrors] = useState({})
 
@@ -97,6 +97,19 @@ export default function AddMemberPage() {
               </Field>
               <Field label="Email" id="email">
                 <input className="input" id="email" type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="john@example.com" />
+              </Field>
+              <Field label="Password" id="password">
+                <input className="input" id="password" type="password" value={form.password} onChange={e => set('password', e.target.value)} placeholder="••••••••" />
+              </Field>
+              <Field label="Plan Selected" id="planId">
+                <select className="input" id="planId" value={form.planId} onChange={e => set('planId', e.target.value)}>
+                  <option value="">Select Plan</option>
+                  {plans.map(p => (
+                    <option key={p._id} value={p._id}>
+                      {p.name} (₹{p.price})
+                    </option>
+                  ))}
+                </select>
               </Field>
               <Field label="Blood Group" id="bloodGroup">
                 <select className="input" id="bloodGroup" value={form.bloodGroup} onChange={e => set('bloodGroup', e.target.value)}>

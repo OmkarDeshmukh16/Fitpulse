@@ -1,5 +1,6 @@
 const Member = require('../models/Member.model');
-const { Membership } = require('../models/MembershipPlan.model');
+const { Membership, MembershipPlan } = require('../models/MembershipPlan.model');
+const User = require('../models/User.model');
 const Payment = require('../models/Payment.model');
 const Attendance = require('../models/Attendance.model');
 const ActivityLog = require('../models/ActivityLog.model');
@@ -12,10 +13,29 @@ const getGymId = (req) => req.user.gymId;
 // @route GET /api/members
 exports.getMembers = async (req, res) => {
   const gymId = getGymId(req);
-  const { page = 1, limit = 20, search, status, planId } = req.query;
+  const { page = 1, limit = 20, search, status, filter, planId } = req.query;
 
   const query = { gymId, isDeleted: false };
-  if (status) query.membershipStatus = status;
+  if (status) {
+    if (status === 'inactive') {
+      query.membershipStatus = { $in: ['inactive', 'expired'] };
+    } else if (status === 'newThisMonth' || status === 'new') {
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+      query.createdAt = { $gte: startOfMonth, $lte: endOfMonth };
+    } else {
+      query.membershipStatus = status;
+    }
+  }
+
+  if (filter === 'newThisMonth' || filter === 'new') {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+    query.createdAt = { $gte: startOfMonth, $lte: endOfMonth };
+  }
+
   if (planId) query.currentPlanId = planId;
   if (search) {
     query.$or = [
@@ -58,7 +78,51 @@ exports.getMember = async (req, res) => {
 // @route POST /api/members
 exports.createMember = async (req, res) => {
   const gymId = getGymId(req);
-  const member = await Member.create({ ...req.body, gymId });
+  const { planId, currentPlanId, password, ...memberData } = req.body;
+  const selectedPlanId = planId || currentPlanId;
+
+  const member = await Member.create({
+    ...memberData,
+    gymId,
+    currentPlanId: selectedPlanId || null,
+    membershipStatus: selectedPlanId ? 'active' : (memberData.membershipStatus || 'active'),
+  });
+
+  // If plan was selected, create active Membership record
+  if (selectedPlanId) {
+    const plan = await MembershipPlan.findById(selectedPlanId);
+    if (plan) {
+      const start = new Date();
+      const end = new Date(start.getTime() + plan.durationDays * 24 * 60 * 60 * 1000);
+      await Membership.create({
+        gymId,
+        memberId: member._id,
+        planId: selectedPlanId,
+        startDate: start,
+        endDate: end,
+        status: 'active',
+      });
+    }
+  }
+
+  // Handle password / User account creation
+  if (password && password.trim()) {
+    const userEmail = member.email || `${member.memberId.toLowerCase()}@fitpulse.app`;
+    let user = await User.findOne({ email: userEmail });
+    if (!user) {
+      user = await User.create({
+        gymId,
+        name: member.fullName,
+        email: userEmail,
+        password: password.trim(),
+        role: 'member',
+      });
+    } else {
+      user.password = password.trim();
+      await user.save();
+    }
+    member.userId = user._id;
+  }
 
   // Generate QR code
   const qrCode = await generateMemberQR(member._id.toString());

@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Plus, Search, Filter, UserCheck, UserX, Eye, Edit, Download, Snowflake } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -12,12 +12,27 @@ const statusBadge = (status) => {
 }
 
 export default function MembersPage() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const statusParam = searchParams.get('status') || ''
+  const filterParam = searchParams.get('filter') || ''
+
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState('')
+  const [statusFilter, setStatusFilter] = useState(statusParam || filterParam)
   const [page, setPage] = useState(1)
   const [freezeMembership] = useFreezeMembershipMutation()
 
-  const { data, isLoading } = useGetMembersQuery({ search, status: statusFilter, page, limit: 15 })
+  useEffect(() => {
+    setStatusFilter(statusParam || filterParam)
+    setPage(1)
+  }, [statusParam, filterParam])
+
+  const { data, isLoading } = useGetMembersQuery({
+    search,
+    status: statusFilter,
+    filter: filterParam,
+    page,
+    limit: 15,
+  })
   const members = data?.data || []
   const pagination = data?.pagination || {}
 
@@ -62,12 +77,24 @@ export default function MembersPage() {
           className="input"
           style={{ width: 'auto', minWidth: 140 }}
           value={statusFilter}
-          onChange={(e) => { setStatusFilter(e.target.value); setPage(1) }}
+          onChange={(e) => {
+            const val = e.target.value
+            setStatusFilter(val)
+            if (val === 'newThisMonth') {
+              setSearchParams({ filter: 'newThisMonth' })
+            } else if (val) {
+              setSearchParams({ status: val })
+            } else {
+              setSearchParams({})
+            }
+            setPage(1)
+          }}
           id="member-status-filter"
         >
           <option value="">All Status</option>
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>
+          <option value="newThisMonth">New This Month</option>
           <option value="frozen">Frozen</option>
           <option value="expired">Expired</option>
         </select>
@@ -80,7 +107,12 @@ export default function MembersPage() {
             <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>Loading members...</div>
           ) : members.length === 0 ? (
             <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--color-text-muted)' }}>
-              No members found. <Link to="/members/new" style={{ color: 'var(--color-accent)' }}>Add your first member.</Link>
+              {statusFilter === 'inactive'
+                ? 'No inactive members found'
+                : statusFilter === 'newThisMonth' || filterParam === 'newThisMonth'
+                ? 'No new members found this month'
+                : 'No members found.'}{' '}
+              <Link to="/members/new" style={{ color: 'var(--color-accent)' }}>Add member.</Link>
             </div>
           ) : (
             <table>

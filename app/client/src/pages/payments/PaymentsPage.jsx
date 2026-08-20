@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Plus, Download, Loader, Receipt } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -82,12 +82,29 @@ function RecordPaymentModal({ onClose }) {
 }
 
 export default function PaymentsPage() {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const rangeParam = searchParams.get('range') || ''
+  const statusParam = searchParams.get('status') || ''
+
   const [showModal, setShowModal] = useState(false)
-  const [statusFilter, setStatusFilter] = useState('')
+  const [statusFilter, setStatusFilter] = useState(statusParam)
   const [methodFilter, setMethodFilter] = useState('')
+  const [rangeFilter, setRangeFilter] = useState(rangeParam)
   const [page, setPage] = useState(1)
 
-  const { data, isLoading } = useGetPaymentsQuery({ status: statusFilter, method: methodFilter, page, limit: 20 })
+  useEffect(() => {
+    setRangeFilter(rangeParam)
+    setStatusFilter(statusParam)
+    setPage(1)
+  }, [rangeParam, statusParam])
+
+  const { data, isLoading } = useGetPaymentsQuery({
+    status: statusFilter,
+    method: methodFilter,
+    range: rangeFilter,
+    page,
+    limit: 20,
+  })
   const payments = data?.data || []
   const pagination = data?.pagination || {}
 
@@ -135,7 +152,18 @@ export default function PaymentsPage() {
 
       {/* Filters */}
       <div style={{ display: 'flex', gap: '0.75rem' }}>
-        <select className="input" style={{ width: 'auto', minWidth: 140 }} value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1) }}>
+        <select
+          className="input"
+          style={{ width: 'auto', minWidth: 140 }}
+          value={statusFilter}
+          onChange={e => {
+            const val = e.target.value
+            setStatusFilter(val)
+            if (val) setSearchParams({ status: val, ...(rangeFilter ? { range: rangeFilter } : {}) })
+            else setSearchParams(rangeFilter ? { range: rangeFilter } : {})
+            setPage(1)
+          }}
+        >
           <option value="">All Status</option>
           <option value="paid">Paid</option>
           <option value="partial">Partial</option>
@@ -191,7 +219,15 @@ export default function PaymentsPage() {
                   </tr>
                 ))}
                 {payments.length === 0 && (
-                  <tr><td colSpan={9} style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-muted)' }}>No payments recorded yet.</td></tr>
+                  <tr>
+                    <td colSpan={9} style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-muted)' }}>
+                      {rangeFilter === 'today'
+                        ? 'No transactions found for today'
+                        : rangeFilter === 'month'
+                        ? 'No transactions found for this month'
+                        : 'No payments recorded yet.'}
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>

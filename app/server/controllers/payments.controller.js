@@ -8,13 +8,28 @@ const getGymId = (req) => req.user.gymId;
 // GET /api/payments
 exports.getPayments = async (req, res) => {
   const gymId = getGymId(req);
-  const { page = 1, limit = 20, status, memberId, startDate, endDate, method } = req.query;
+  const { page = 1, limit = 20, status, memberId, startDate, endDate, method, range } = req.query;
 
   const query = { gymId };
-  if (status) query.status = status;
+  if (status) {
+    query.status = status;
+  }
   if (memberId) query.memberId = memberId;
   if (method) query.method = method;
-  if (startDate && endDate) {
+
+  if (range === 'today') {
+    const now = new Date();
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+    const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+    query.date = { $gte: startOfDay, $lte: endOfDay };
+    if (!status) query.status = { $in: ['paid', 'partial'] };
+  } else if (range === 'month') {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+    query.date = { $gte: startOfMonth, $lte: endOfMonth };
+    if (!status) query.status = { $in: ['paid', 'partial'] };
+  } else if (startDate && endDate) {
     query.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
   }
 
