@@ -18,6 +18,7 @@ const paymentRoutes = require('./routes/payments.routes');
 const reportRoutes = require('./routes/reports.routes');
 const settingsRoutes = require('./routes/settings.routes');
 const demoRoutes = require('./routes/demo.routes');
+const portalRoutes = require('./routes/portal.routes');
 
 const app = express();
 
@@ -80,6 +81,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/demo-requests', demoRoutes);
+app.use('/api/portal', portalRoutes);
 
 // 404 handler
 app.use((req, res) => {

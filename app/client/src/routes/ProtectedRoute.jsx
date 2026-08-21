@@ -9,6 +9,10 @@ export default function ProtectedRoute({ allowedRoles }) {
   if (!isAuthenticated) return <Navigate to="/login" replace />
 
   if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+    // Redirect members to their portal, admins to dashboard
+    if (user.role === 'member') {
+      return <Navigate to="/portal/dashboard" replace />
+    }
     return <Navigate to="/dashboard" replace />
   }
 

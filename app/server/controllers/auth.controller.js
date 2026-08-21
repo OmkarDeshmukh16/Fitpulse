@@ -42,12 +42,21 @@ exports.login = async (req, res) => {
     gymSettings = await Settings.findById(user.gymId).lean();
   }
 
+  // If member role, attach member profile info
+  let memberProfile = null;
+  if (user.role === 'member') {
+    const Member = require('../models/Member.model');
+    const member = await Member.findOne({ userId: user._id, isDeleted: false }).select('_id memberId fullName photo membershipStatus');
+    memberProfile = member ? member.toObject() : null;
+  }
+
   res.json({
     success: true,
     accessToken,
     refreshToken,
     user: user.toJSON(),
     gymSettings,
+    memberProfile,
   });
 };
 

@@ -6,6 +6,7 @@ import { store } from './redux/store'
 
 import ProtectedRoute from './routes/ProtectedRoute'
 import DashboardLayout from './components/layout/DashboardLayout'
+import MemberPortalLayout from './components/layout/MemberPortalLayout'
 
 import LoginPage from './pages/auth/LoginPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
@@ -21,6 +22,16 @@ import PaymentsPage from './pages/payments/PaymentsPage'
 import ReportsPage from './pages/reports/ReportsPage'
 import SettingsPage from './pages/settings/SettingsPage'
 import SuperAdminDashboardPage from './pages/superadmin/SuperAdminDashboardPage'
+
+// Member Portal Pages
+import PortalDashboardPage from './pages/portal/PortalDashboardPage'
+import PortalMembershipPage from './pages/portal/PortalMembershipPage'
+import PortalAttendancePage from './pages/portal/PortalAttendancePage'
+import PortalWorkoutPlanPage from './pages/portal/PortalWorkoutPlanPage'
+import PortalDietPlanPage from './pages/portal/PortalDietPlanPage'
+import PortalProgressPage from './pages/portal/PortalProgressPage'
+import PortalPTSessionsPage from './pages/portal/PortalPTSessionsPage'
+import PortalPaymentsPage from './pages/portal/PortalPaymentsPage'
 
 // Lazy-load the landing page so Three.js/3D bundle doesn't affect dashboard load time
 const LandingPage = lazy(() => import('./pages/landing/LandingPage'))
@@ -58,8 +69,8 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
-          {/* Protected app routes */}
-          <Route element={<ProtectedRoute />}>
+          {/* Protected admin/staff routes */}
+          <Route element={<ProtectedRoute allowedRoles={['superadmin', 'gymowner', 'manager', 'trainer', 'receptionist']} />}>
             <Route element={<DashboardLayout />}>
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/superadmin" element={<SuperAdminDashboardPage />} />
@@ -72,6 +83,20 @@ export default function App() {
               <Route path="/payments" element={<PaymentsPage />} />
               <Route path="/reports" element={<ReportsPage />} />
               <Route path="/settings" element={<SettingsPage />} />
+            </Route>
+          </Route>
+
+          {/* Protected member portal routes */}
+          <Route element={<ProtectedRoute allowedRoles={['member']} />}>
+            <Route element={<MemberPortalLayout />}>
+              <Route path="/portal/dashboard" element={<PortalDashboardPage />} />
+              <Route path="/portal/membership" element={<PortalMembershipPage />} />
+              <Route path="/portal/attendance" element={<PortalAttendancePage />} />
+              <Route path="/portal/workout-plan" element={<PortalWorkoutPlanPage />} />
+              <Route path="/portal/diet-plan" element={<PortalDietPlanPage />} />
+              <Route path="/portal/progress" element={<PortalProgressPage />} />
+              <Route path="/portal/pt-sessions" element={<PortalPTSessionsPage />} />
+              <Route path="/portal/payments" element={<PortalPaymentsPage />} />
             </Route>
           </Route>
 

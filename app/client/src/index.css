@@ -529,4 +529,33 @@
   .spin {
     animation: spin 1s linear infinite;
   }
+
+  /* ===================== MEMBER PORTAL ===================== */
+
+  /* Member sidebar links — emerald accent instead of indigo */
+  .member-sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 1rem;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    transition: all 0.2s;
+    cursor: pointer;
+    border: 1px solid transparent;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+  }
+  .member-sidebar-link:hover {
+    background: var(--color-bg-hover);
+    color: var(--color-text-primary);
+  }
+  .member-sidebar-link.active {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.05));
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+  }
 }
