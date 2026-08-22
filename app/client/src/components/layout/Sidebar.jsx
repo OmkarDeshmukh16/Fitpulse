@@ -30,7 +30,7 @@ export default function Sidebar() {
   const handleLogout = async () => {
     try { await logoutMutation().unwrap() } catch {}
     dispatch(logout())
-    navigate('/login')
+    navigate('/')
   }
 
   const navItems = user?.role === 'superadmin'

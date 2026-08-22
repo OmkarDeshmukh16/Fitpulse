@@ -28,7 +28,7 @@ export default function PortalDashboardPage() {
   ]
 
   const quickActions = [
-    { label: 'My Digital QR Pass', action: () => setShowQRModal(true), icon: QrCode, color: '#10b981' },
+    { label: 'My Account & QR Pass', to: '/portal/profile', icon: QrCode, color: '#10b981' },
     { label: 'Renew Membership', to: '/portal/membership', icon: Award, color: '#6366f1' },
     { label: 'Book PT Session', to: '/portal/pt-sessions', icon: UserCheck, color: '#f59e0b' },
     { label: 'View Attendance', to: '/portal/attendance', icon: CalendarCheck, color: '#3b82f6' },

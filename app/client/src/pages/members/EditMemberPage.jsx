@@ -3,8 +3,32 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Loader, User } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useGetMemberQuery, useUpdateMemberMutation } from '../../services/members.api'
+import SearchableSelect from '../../components/common/SearchableSelect'
 
-const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
+const BLOOD_GROUPS = [
+  { value: '', label: 'Select Blood Group' },
+  { value: 'A+', label: 'A+' },
+  { value: 'A-', label: 'A-' },
+  { value: 'B+', label: 'B+' },
+  { value: 'B-', label: 'B-' },
+  { value: 'AB+', label: 'AB+' },
+  { value: 'AB-', label: 'AB-' },
+  { value: 'O+', label: 'O+' },
+  { value: 'O-', label: 'O-' },
+]
+
+const GENDERS = [
+  { value: 'male', label: 'Male' },
+  { value: 'female', label: 'Female' },
+  { value: 'other', label: 'Other' },
+]
+
+const STATUSES = [
+  { value: 'active', label: 'Active' },
+  { value: 'inactive', label: 'Inactive' },
+  { value: 'frozen', label: 'Frozen' },
+  { value: 'expired', label: 'Expired' },
+]
 
 function Field({ label, id, error, children }) {
   return (
@@ -131,11 +155,12 @@ export default function EditMemberPage() {
               </Field>
 
               <Field label="Gender *" id="gender" error={errors.gender}>
-                <select className="input" id="gender" value={form.gender} onChange={e => set('gender', e.target.value)}>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                </select>
+                <SearchableSelect
+                  options={GENDERS}
+                  value={form.gender}
+                  onChange={val => set('gender', val)}
+                  id="gender"
+                />
               </Field>
 
               <Field label="Date of Birth" id="dob">
@@ -151,19 +176,22 @@ export default function EditMemberPage() {
               </Field>
 
               <Field label="Blood Group" id="bloodGroup">
-                <select className="input" id="bloodGroup" value={form.bloodGroup} onChange={e => set('bloodGroup', e.target.value)}>
-                  <option value="">Select</option>
-                  {BLOOD_GROUPS.map(b => <option key={b} value={b}>{b}</option>)}
-                </select>
+                <SearchableSelect
+                  options={BLOOD_GROUPS}
+                  value={form.bloodGroup}
+                  onChange={val => set('bloodGroup', val)}
+                  placeholder="Select Blood Group..."
+                  id="bloodGroup"
+                />
               </Field>
 
               <Field label="Membership Status" id="membershipStatus">
-                <select className="input" id="membershipStatus" value={form.membershipStatus} onChange={e => set('membershipStatus', e.target.value)}>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                  <option value="frozen">Frozen</option>
-                  <option value="expired">Expired</option>
-                </select>
+                <SearchableSelect
+                  options={STATUSES}
+                  value={form.membershipStatus}
+                  onChange={val => set('membershipStatus', val)}
+                  id="membershipStatus"
+                />
               </Field>
 
               <Field label="Address" id="address">

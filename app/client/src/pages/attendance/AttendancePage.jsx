@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   QrCode, UserPlus, LogIn, LogOut, Camera, X, Check, Search,
-  RefreshCw, Maximize2, Minimize2, Upload, AlertCircle, Sparkles,
-  Shield, Clock, Phone, User, Monitor, Zap, ChevronDown
+  RefreshCw, Minimize2, Upload, AlertCircle, Sparkles,
+  Clock, User, Monitor, Zap
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'

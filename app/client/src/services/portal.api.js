@@ -8,6 +8,16 @@ export const portalApi = apiSlice.injectEndpoints({
       providesTags: ['PortalDashboard'],
     }),
 
+    // Profile & Account
+    getPortalProfile: builder.query({
+      query: () => '/portal/profile',
+      providesTags: ['PortalProfile'],
+    }),
+    updatePortalProfile: builder.mutation({
+      query: (body) => ({ url: '/portal/profile', method: 'PUT', body }),
+      invalidatesTags: ['PortalProfile', 'PortalDashboard'],
+    }),
+
     // Membership
     getPortalMembership: builder.query({
       query: () => '/portal/membership',
@@ -75,6 +85,8 @@ export const portalApi = apiSlice.injectEndpoints({
 
 export const {
   useGetPortalDashboardQuery,
+  useGetPortalProfileQuery,
+  useUpdatePortalProfileMutation,
   useGetPortalMembershipQuery,
   useGetPortalAttendanceQuery,
   useGetPortalWorkoutPlanQuery,

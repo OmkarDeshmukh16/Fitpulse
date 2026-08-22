@@ -1,14 +1,29 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
 import { ArrowLeft, Loader, User } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useCreateMemberMutation } from '../../services/members.api'
 import { useGetActivePlansQuery } from '../../services/api'
+import SearchableSelect from '../../components/common/SearchableSelect'
 
-const BLOOD_GROUPS = ['A+','A-','B+','B-','AB+','AB-','O+','O-']
+const BLOOD_GROUPS = [
+  { value: '', label: 'Select Blood Group' },
+  { value: 'A+', label: 'A+' },
+  { value: 'A-', label: 'A-' },
+  { value: 'B+', label: 'B+' },
+  { value: 'B-', label: 'B-' },
+  { value: 'AB+', label: 'AB+' },
+  { value: 'AB-', label: 'AB-' },
+  { value: 'O+', label: 'O+' },
+  { value: 'O-', label: 'O-' },
+]
 
-// Defined at module level — NOT inside the component — to prevent remount on every render
+const GENDERS = [
+  { value: 'male', label: 'Male' },
+  { value: 'female', label: 'Female' },
+  { value: 'other', label: 'Other' },
+]
+
 function Field({ label, id, error, children }) {
   return (
     <div className="form-group">
@@ -35,6 +50,15 @@ export default function AddMemberPage() {
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }))
   const setEc = (key, val) => setForm(f => ({ ...f, emergencyContact: { ...f.emergencyContact, [key]: val } }))
 
+  const planOptions = [
+    { value: '', label: 'Select Plan (Optional)' },
+    ...plans.map(p => ({
+      value: p._id,
+      label: p.name,
+      sublabel: `₹${p.price?.toLocaleString()} • ${p.durationDays} days`,
+    })),
+  ]
+
   const validate = () => {
     const e = {}
     if (!form.fullName.trim()) e.fullName = 'Full name is required'
@@ -55,7 +79,6 @@ export default function AddMemberPage() {
       toast.error(err?.data?.message || 'Failed to create member')
     }
   }
-
 
   return (
     <div className="fade-in">
@@ -83,11 +106,12 @@ export default function AddMemberPage() {
                 <input className="input" id="fullName" value={form.fullName} onChange={e => set('fullName', e.target.value)} placeholder="John Doe" />
               </Field>
               <Field label="Gender *" id="gender" error={errors.gender}>
-                <select className="input" id="gender" value={form.gender} onChange={e => set('gender', e.target.value)}>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                </select>
+                <SearchableSelect
+                  options={GENDERS}
+                  value={form.gender}
+                  onChange={val => set('gender', val)}
+                  id="gender"
+                />
               </Field>
               <Field label="Date of Birth" id="dob">
                 <input className="input" id="dob" type="date" value={form.dob} onChange={e => set('dob', e.target.value)} />
@@ -102,20 +126,23 @@ export default function AddMemberPage() {
                 <input className="input" id="password" type="password" value={form.password} onChange={e => set('password', e.target.value)} placeholder="••••••••" />
               </Field>
               <Field label="Plan Selected" id="planId">
-                <select className="input" id="planId" value={form.planId} onChange={e => set('planId', e.target.value)}>
-                  <option value="">Select Plan</option>
-                  {plans.map(p => (
-                    <option key={p._id} value={p._id}>
-                      {p.name} (₹{p.price})
-                    </option>
-                  ))}
-                </select>
+                <SearchableSelect
+                  options={planOptions}
+                  value={form.planId}
+                  onChange={val => set('planId', val)}
+                  placeholder="Select Plan..."
+                  searchPlaceholder="Search plans..."
+                  id="planId"
+                />
               </Field>
               <Field label="Blood Group" id="bloodGroup">
-                <select className="input" id="bloodGroup" value={form.bloodGroup} onChange={e => set('bloodGroup', e.target.value)}>
-                  <option value="">Select</option>
-                  {BLOOD_GROUPS.map(b => <option key={b} value={b}>{b}</option>)}
-                </select>
+                <SearchableSelect
+                  options={BLOOD_GROUPS}
+                  value={form.bloodGroup}
+                  onChange={val => set('bloodGroup', val)}
+                  placeholder="Select Blood Group..."
+                  id="bloodGroup"
+                />
               </Field>
               <Field label="Address" id="address">
                 <input className="input" id="address" value={form.address} onChange={e => set('address', e.target.value)} placeholder="123 Main St, City" />

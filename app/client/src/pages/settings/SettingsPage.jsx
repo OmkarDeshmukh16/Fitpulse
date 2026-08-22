@@ -5,6 +5,7 @@ import toast from 'react-hot-toast'
 import { useGetSettingsQuery, useUpdateSettingsMutation, useGetStaffQuery, useAddStaffMutation } from '../../services/api'
 import { useDispatch } from 'react-redux'
 import { updateGymSettings } from '../../redux/slices/authSlice'
+import SearchableSelect from '../../components/common/SearchableSelect'
 
 const tabs = ['Gym Profile', 'System', 'Staff']
 
@@ -136,11 +137,16 @@ function StaffTab() {
             </div>
             <div className="form-group">
               <label className="label">Role</label>
-              <select className="input" value={form.role} onChange={e => set('role', e.target.value)} id="staff-role">
-                <option value="manager">Manager</option>
-                <option value="trainer">Trainer</option>
-                <option value="receptionist">Receptionist</option>
-              </select>
+              <SearchableSelect
+                options={[
+                  { value: 'manager', label: 'Manager' },
+                  { value: 'trainer', label: 'Trainer' },
+                  { value: 'receptionist', label: 'Receptionist' },
+                ]}
+                value={form.role}
+                onChange={val => set('role', val)}
+                id="staff-role"
+              />
             </div>
             <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
               <button type="button" className="btn btn-secondary" onClick={() => setShowForm(false)}>Cancel</button>

@@ -32,6 +32,7 @@ import PortalDietPlanPage from './pages/portal/PortalDietPlanPage'
 import PortalProgressPage from './pages/portal/PortalProgressPage'
 import PortalPTSessionsPage from './pages/portal/PortalPTSessionsPage'
 import PortalPaymentsPage from './pages/portal/PortalPaymentsPage'
+import PortalProfilePage from './pages/portal/PortalProfilePage'
 
 // Lazy-load the landing page so Three.js/3D bundle doesn't affect dashboard load time
 const LandingPage = lazy(() => import('./pages/landing/LandingPage'))
@@ -97,6 +98,7 @@ export default function App() {
               <Route path="/portal/progress" element={<PortalProgressPage />} />
               <Route path="/portal/pt-sessions" element={<PortalPTSessionsPage />} />
               <Route path="/portal/payments" element={<PortalPaymentsPage />} />
+              <Route path="/portal/profile" element={<PortalProfilePage />} />
             </Route>
           </Route>
 

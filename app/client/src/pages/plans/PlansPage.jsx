@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { Plus, Edit, Trash2, Loader, Check, X, Dumbbell, Users } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useGetPlansQuery, useCreatePlanMutation, useUpdatePlanMutation, useDeletePlanMutation } from '../../services/api'
+import SearchableSelect from '../../components/common/SearchableSelect'
 
 const PRESET_COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6']
 
@@ -94,10 +95,15 @@ function PlanForm({ plan, onSubmit, onCancel, isLoading }) {
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
             <div className="form-group" style={{ flex: 1 }}>
               <label className="label">Status</label>
-              <select className="input" value={form.status} onChange={e => set('status', e.target.value)}>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
+              <SearchableSelect
+                options={[
+                  { value: 'active', label: 'Active' },
+                  { value: 'inactive', label: 'Inactive' },
+                ]}
+                value={form.status}
+                onChange={val => set('status', val)}
+                id="plan-status"
+              />
             </div>
             <div className="form-group">
               <label className="label">Color</label>

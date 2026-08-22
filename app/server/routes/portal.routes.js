@@ -3,6 +3,8 @@ const router = express.Router();
 const { authenticate, authorize } = require('../middleware/authenticate');
 const {
   getDashboard,
+  getProfile,
+  updateProfile,
   getMembership,
   getAttendance,
   getWorkoutPlan,
@@ -20,6 +22,10 @@ const {
 
 // All portal routes require authentication + member role
 router.use(authenticate, authorize('member'));
+
+// Profile / Account
+router.get('/profile', getProfile);
+router.put('/profile', updateProfile);
 
 // Dashboard
 router.get('/dashboard', getDashboard);

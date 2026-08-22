@@ -529,3 +529,63 @@ exports.verifyRenewalPayment = async (req, res) => {
     },
   });
 };
+
+// ─────────────────────────────────────────────
+// GET /api/portal/profile
+// ─────────────────────────────────────────────
+exports.getProfile = async (req, res) => {
+  const member = await getMember(req);
+  const gymId = member.gymId;
+
+  // Auto-generate QR code if missing
+  if (!member.qrCode) {
+    try {
+      member.qrCode = await generateMemberQR(member);
+      await member.save();
+    } catch {}
+  }
+
+  const populatedMember = await Member.findById(member._id)
+    .populate('currentPlanId')
+    .populate('trainerId', 'name email phone');
+
+  const activeMembership = await Membership.findOne({
+    memberId: member._id,
+    gymId,
+    status: 'active',
+  }).populate('planId');
+
+  const gym = await Settings.findById(gymId);
+
+  res.json({
+    success: true,
+    data: {
+      ...populatedMember.toObject(),
+      activeMembership,
+      gym: gym ? { name: gym.gymName, phone: gym.phone, email: gym.email, address: gym.address } : null,
+    },
+  });
+};
+
+// ─────────────────────────────────────────────
+// PUT /api/portal/profile
+// ─────────────────────────────────────────────
+exports.updateProfile = async (req, res) => {
+  const member = await getMember(req);
+  const { phone, email, address, emergencyContact, medicalConditions } = req.body;
+
+  if (phone) member.phone = phone;
+  if (email) member.email = email;
+  if (address !== undefined) member.address = address;
+  if (emergencyContact) member.emergencyContact = emergencyContact;
+  if (medicalConditions !== undefined) member.medicalConditions = medicalConditions;
+
+  await member.save();
+
+  res.json({
+    success: true,
+    message: 'Profile updated successfully',
+    data: member,
+  });
+};
+

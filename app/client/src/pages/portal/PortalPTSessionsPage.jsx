@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { UserCheck, Calendar, Clock, Plus, X, Loader, Dumbbell, Zap, StretchHorizontal } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useGetPortalPTSessionsQuery, useBookPortalPTSessionMutation, useCancelPortalPTSessionMutation } from '../../services/portal.api'
+import SearchableSelect from '../../components/common/SearchableSelect'
 
 const fadeUp = { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 } }
 
@@ -106,12 +107,13 @@ export default function PortalPTSessionsPage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
               <div className="form-group">
                 <label className="label">Trainer *</label>
-                <select className="input" value={form.trainerId} onChange={(e) => setForm({ ...form, trainerId: e.target.value })} required>
-                  <option value="">Select trainer</option>
-                  {trainers.map((t) => (
-                    <option key={t._id} value={t._id}>{t.name}</option>
-                  ))}
-                </select>
+                <SearchableSelect
+                  options={trainers.map((t) => ({ value: t._id, label: t.name }))}
+                  value={form.trainerId}
+                  onChange={(val) => setForm({ ...form, trainerId: val })}
+                  placeholder="Select trainer..."
+                  searchPlaceholder="Search trainers..."
+                />
               </div>
               <div className="form-group">
                 <label className="label">Date *</label>
@@ -126,11 +128,12 @@ export default function PortalPTSessionsPage() {
               </div>
               <div className="form-group">
                 <label className="label">Session Type</label>
-                <select className="input" value={form.sessionType} onChange={(e) => setForm({ ...form, sessionType: e.target.value })}>
-                  {Object.entries(sessionTypeConfig).map(([key, val]) => (
-                    <option key={key} value={key}>{val.label}</option>
-                  ))}
-                </select>
+                <SearchableSelect
+                  options={Object.entries(sessionTypeConfig).map(([key, val]) => ({ value: key, label: val.label }))}
+                  value={form.sessionType}
+                  onChange={(val) => setForm({ ...form, sessionType: val })}
+                  placeholder="Select session type..."
+                />
               </div>
             </div>
 

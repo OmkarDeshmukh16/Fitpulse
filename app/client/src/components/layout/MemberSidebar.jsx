@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, CreditCard, CalendarCheck, Dumbbell,
   ChevronLeft, ChevronRight, LogOut, Award, Apple, TrendingUp,
-  UserCheck, Download,
+  UserCheck, User, QrCode,
 } from 'lucide-react'
 import { logout, selectGymSettings, selectCurrentUser } from '../../redux/slices/authSlice'
 import { toggleSidebar } from '../../redux/slices/uiSlice'
@@ -12,6 +12,7 @@ import { useLogoutMutation } from '../../services/auth.api'
 
 const navItems = [
   { to: '/portal/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/portal/profile', icon: User, label: 'My Account & Pass' },
   { to: '/portal/membership', icon: Award, label: 'Membership' },
   { to: '/portal/attendance', icon: CalendarCheck, label: 'Attendance' },
   { to: '/portal/workout-plan', icon: Dumbbell, label: 'Workout Plan' },
@@ -32,7 +33,7 @@ export default function MemberSidebar() {
   const handleLogout = async () => {
     try { await logoutMutation().unwrap() } catch {}
     dispatch(logout())
-    navigate('/login')
+    navigate('/')
   }
 
   return (
@@ -108,9 +109,23 @@ export default function MemberSidebar() {
       {/* Bottom */}
       <div style={{ padding: '0.75rem', borderTop: '1px solid var(--color-bg-border)', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
         {!collapsed && user && (
-          <div style={{ padding: '0.5rem 0.75rem', marginBottom: '0.5rem' }}>
+          <div
+            onClick={() => navigate('/portal/profile')}
+            style={{
+              padding: '0.5rem 0.75rem',
+              marginBottom: '0.5rem',
+              borderRadius: 'var(--radius-md)',
+              background: 'rgba(16,185,129,0.06)',
+              border: '1px solid rgba(16,185,129,0.15)',
+              cursor: 'pointer',
+              transition: 'background 0.2s',
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(16,185,129,0.12)'}
+            onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(16,185,129,0.06)'}
+            title="View Account Details & Pass"
+          >
             <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>{user.name}</div>
-            <div style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>{user.email}</div>
+            <div style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 500 }}>View My Account & Pass →</div>
           </div>
         )}
         <button className="member-sidebar-link" onClick={handleLogout} title={collapsed ? 'Logout' : undefined}>
