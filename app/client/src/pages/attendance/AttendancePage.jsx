@@ -8,6 +8,7 @@ import {
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
 import { Html5Qrcode } from 'html5-qrcode'
+import jsQR from 'jsqr'
 import {
   useGetTodayAttendanceQuery,
   useCheckInMutation,
@@ -67,9 +68,116 @@ const playSound = (type = 'success') => {
   } catch {}
 }
 
-// ─────────────────────────────────────────────────────────────
-// 1. QR SCANNER MODAL (Camera + File Upload + Mode Switcher)
-// ─────────────────────────────────────────────────────────────
+// Multi-pass robust QR code decoder from image File / Blob
+async function decodeQRImageFile(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    const url = URL.createObjectURL(file)
+
+    img.onload = async () => {
+      URL.revokeObjectURL(url)
+      const naturalWidth = img.naturalWidth || img.width
+      const naturalHeight = img.naturalHeight || img.height
+
+      if (!naturalWidth || !naturalHeight) {
+        return reject(new Error('Invalid image dimensions'))
+      }
+
+      // Multi-scale passes to handle ultra-high-res photos as well as small crops
+      const scales = [1.0, 0.75, 0.5, 1.25, 0.35, 1.5, 0.25, 2.0]
+
+      for (const scale of scales) {
+        const width = Math.round(naturalWidth * scale)
+        const height = Math.round(naturalHeight * scale)
+        if (width < 30 || height < 30) continue
+
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d', { willReadFrequently: true })
+        if (!ctx) continue
+
+        ctx.drawImage(img, 0, 0, width, height)
+        const imageData = ctx.getImageData(0, 0, width, height)
+
+        // Pass 1: Direct jsQR scan
+        let code = jsQR(imageData.data, width, height, {
+          inversionAttempts: 'attemptBoth',
+        })
+        if (code && code.data && code.data.trim()) {
+          return resolve(code.data.trim())
+        }
+
+        // Pass 2: High contrast binarization
+        const d = imageData.data
+        const binaryData = new Uint8ClampedArray(d.length)
+        for (let i = 0; i < d.length; i += 4) {
+          const gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]
+          const v = gray > 130 ? 255 : 0
+          binaryData[i] = v
+          binaryData[i + 1] = v
+          binaryData[i + 2] = v
+          binaryData[i + 3] = 255
+        }
+        code = jsQR(binaryData, width, height, {
+          inversionAttempts: 'attemptBoth',
+        })
+        if (code && code.data && code.data.trim()) {
+          return resolve(code.data.trim())
+        }
+
+        // Pass 3: Inverted contrast
+        const invertedData = new Uint8ClampedArray(d.length)
+        for (let i = 0; i < d.length; i += 4) {
+          const gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2]
+          const v = gray < 130 ? 255 : 0
+          invertedData[i] = v
+          invertedData[i + 1] = v
+          invertedData[i + 2] = v
+          invertedData[i + 3] = 255
+        }
+        code = jsQR(invertedData, width, height, {
+          inversionAttempts: 'attemptBoth',
+        })
+        if (code && code.data && code.data.trim()) {
+          return resolve(code.data.trim())
+        }
+      }
+
+      // Fallback: Html5Qrcode scanFile
+      try {
+        const tempContainerId = 'qr-temp-decode-container'
+        let container = document.getElementById(tempContainerId)
+        if (!container) {
+          container = document.createElement('div')
+          container.id = tempContainerId
+          container.style.position = 'fixed'
+          container.style.top = '-9999px'
+          container.style.left = '-9999px'
+          container.style.width = '300px'
+          container.style.height = '300px'
+          document.body.appendChild(container)
+        }
+        const html5QrCode = new Html5Qrcode(tempContainerId)
+        const decodedText = await html5QrCode.scanFile(file, false)
+        html5QrCode.clear()
+        if (decodedText && decodedText.trim()) {
+          return resolve(decodedText.trim())
+        }
+      } catch {}
+
+      reject(new Error('Could not find or read QR code from this image.'))
+    }
+
+    img.onerror = (err) => {
+      URL.revokeObjectURL(url)
+      reject(err)
+    }
+
+    img.src = url
+  })
+}
+
 function QRScannerModal({ onClose, onScanSuccess }) {
   const [activeTab, setActiveTab] = useState('camera') // 'camera' | 'upload'
   const [scanMode, setScanMode] = useState('auto') // 'auto' | 'checkin' | 'checkout'
@@ -207,19 +315,26 @@ function QRScannerModal({ onClose, onScanSuccess }) {
     }
   }, [activeTab, selectedCamera])
 
-  // Handle image file upload
+  const [isProcessingFile, setIsProcessingFile] = useState(false)
+  const [filePreview, setFilePreview] = useState(null)
+
+  // Handle image file upload using multi-pass jsQR decoder
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0]
     if (!file) return
 
+    setIsProcessingFile(true)
+    const previewUrl = URL.createObjectURL(file)
+    setFilePreview(previewUrl)
+
     try {
-      const html5QrCode = new Html5Qrcode('qr-upload-hidden')
-      const decodedText = await html5QrCode.scanFile(file, true)
-      html5QrCode.clear()
+      const decodedText = await decodeQRImageFile(file)
       await handleProcessQR(decodedText)
     } catch (err) {
       playSound('error')
-      toast.error('Could not find or read QR code from this image.')
+      toast.error('Could not find or read QR code from this image. Please check the image or crop to the QR code.')
+    } finally {
+      setIsProcessingFile(false)
     }
   }
 
@@ -425,13 +540,13 @@ function QRScannerModal({ onClose, onScanSuccess }) {
         {/* UPLOAD VIEW */}
         {activeTab === 'upload' && (
           <div>
-            <div id="qr-upload-hidden" style={{ display: 'none' }} />
             <label
               style={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                 padding: '2.5rem 1.5rem', border: '2px dashed var(--color-bg-border)',
                 borderRadius: 'var(--radius-lg)', background: 'var(--color-bg-secondary)',
-                cursor: 'pointer', transition: 'all 0.2s', gap: '0.75rem',
+                cursor: isProcessingFile ? 'wait' : 'pointer', transition: 'all 0.2s', gap: '0.75rem',
+                position: 'relative', overflow: 'hidden', minHeight: 200,
               }}
               onDragOver={(e) => e.preventDefault()}
               onDrop={(e) => {
@@ -441,25 +556,46 @@ function QRScannerModal({ onClose, onScanSuccess }) {
                 }
               }}
             >
-              <div style={{
-                width: 48, height: 48, borderRadius: '50%',
-                background: 'rgba(99,102,241,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <Upload size={22} color="var(--color-accent-light)" />
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <p style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '0.25rem' }}>
-                  Click to browse or drag & drop QR image
-                </p>
-                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-                  PNG, JPG, or screenshot of member pass
-                </p>
-              </div>
+              {isProcessingFile ? (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+                  <div className="spin" style={{ width: 36, height: 36, border: '3px solid var(--color-bg-border)', borderTopColor: '#10b981', borderRadius: '50%' }} />
+                  <p style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                    Scanning QR Code...
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {filePreview ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+                      <img src={filePreview} alt="Preview" style={{ maxHeight: 110, borderRadius: 10, border: '1px solid var(--color-bg-border)', objectFit: 'contain' }} />
+                      <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>Click or drop another image to scan</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div style={{
+                        width: 48, height: 48, borderRadius: '50%',
+                        background: 'rgba(99,102,241,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        <Upload size={22} color="var(--color-accent-light)" />
+                      </div>
+                      <div style={{ textAlign: 'center' }}>
+                        <p style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '0.25rem' }}>
+                          Click to browse or drag & drop QR image
+                        </p>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+                          PNG, JPG, or screenshot of member pass
+                        </p>
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleFileUpload}
                 style={{ display: 'none' }}
+                disabled={isProcessingFile}
               />
             </label>
           </div>
