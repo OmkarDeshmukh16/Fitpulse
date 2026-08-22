@@ -1,5 +1,6 @@
-import { motion } from 'framer-motion'
-import { CalendarCheck, TrendingUp, Dumbbell, UserCheck, Award, ArrowRight, Flame, Zap } from 'lucide-react'
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { CalendarCheck, TrendingUp, Dumbbell, UserCheck, Award, ArrowRight, Flame, Zap, QrCode, X, Download, ShieldCheck } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useGetPortalDashboardQuery } from '../../services/portal.api'
 
@@ -7,6 +8,7 @@ const fadeUp = { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 } }
 
 export default function PortalDashboardPage() {
   const navigate = useNavigate()
+  const [showQRModal, setShowQRModal] = useState(false)
   const { data, isLoading } = useGetPortalDashboardQuery()
   const d = data?.data
 
@@ -26,11 +28,12 @@ export default function PortalDashboardPage() {
   ]
 
   const quickActions = [
-    { label: 'Renew Membership', to: '/portal/membership', icon: Award, color: '#10b981' },
-    { label: 'Book PT Session', to: '/portal/pt-sessions', icon: UserCheck, color: '#6366f1' },
-    { label: 'Log Progress', to: '/portal/progress', icon: TrendingUp, color: '#f59e0b' },
+    { label: 'My Digital QR Pass', action: () => setShowQRModal(true), icon: QrCode, color: '#10b981' },
+    { label: 'Renew Membership', to: '/portal/membership', icon: Award, color: '#6366f1' },
+    { label: 'Book PT Session', to: '/portal/pt-sessions', icon: UserCheck, color: '#f59e0b' },
     { label: 'View Attendance', to: '/portal/attendance', icon: CalendarCheck, color: '#3b82f6' },
   ]
+
 
   // Mini calendar - last 30 days
   const today = new Date()
@@ -64,16 +67,29 @@ export default function PortalDashboardPage() {
             : 'No active membership. Renew now to get started!'
           }
         </p>
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-          marginTop: '0.75rem', padding: '0.35rem 0.75rem',
-          borderRadius: 99, fontSize: '0.75rem', fontWeight: 600,
-          background: d?.member?.membershipStatus === 'active' ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)',
-          color: d?.member?.membershipStatus === 'active' ? '#10b981' : '#ef4444',
-          textTransform: 'uppercase', letterSpacing: '0.05em',
-        }}>
-          <Zap size={12} />
-          {d?.member?.membershipStatus || 'inactive'}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+            padding: '0.35rem 0.75rem', borderRadius: 99, fontSize: '0.75rem', fontWeight: 600,
+            background: d?.member?.membershipStatus === 'active' ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)',
+            color: d?.member?.membershipStatus === 'active' ? '#10b981' : '#ef4444',
+            textTransform: 'uppercase', letterSpacing: '0.05em',
+          }}>
+            <Zap size={12} />
+            {d?.member?.membershipStatus || 'inactive'}
+          </div>
+
+          <button
+            className="btn btn-primary"
+            style={{
+              fontSize: '0.825rem', padding: '0.45rem 1rem',
+              background: 'linear-gradient(135deg, #10b981, #059669)',
+              boxShadow: '0 4px 15px rgba(16,185,129,0.3)',
+            }}
+            onClick={() => setShowQRModal(true)}
+          >
+            <QrCode size={15} /> Show My QR Pass
+          </button>
         </div>
       </motion.div>
 
@@ -101,7 +117,10 @@ export default function PortalDashboardPage() {
             {quickActions.map((a) => (
               <button
                 key={a.label}
-                onClick={() => navigate(a.to)}
+                onClick={() => {
+                  if (a.action) a.action()
+                  else if (a.to) navigate(a.to)
+                }}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '0.75rem', width: '100%',
                   padding: '0.875rem 1rem', borderRadius: 'var(--radius-md)',
@@ -195,6 +214,76 @@ export default function PortalDashboardPage() {
           </div>
         </motion.div>
       )}
+
+      {/* DIGITAL QR GYM PASS MODAL */}
+      <AnimatePresence>
+        {showQRModal && (
+          <div className="modal-overlay" onClick={() => setShowQRModal(false)} style={{ zIndex: 100 }}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="modal"
+              style={{
+                maxWidth: 380, width: '90%', textAlign: 'center', padding: '2rem',
+                background: 'var(--color-bg-card)', border: '1px solid var(--color-bg-border)',
+                borderRadius: 'var(--radius-xl)', boxShadow: '0 25px 70px rgba(0,0,0,0.7)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <ShieldCheck size={18} color="#10b981" />
+                  <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--color-text-primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Digital Gym Pass
+                  </span>
+                </div>
+                <button className="btn btn-ghost" onClick={() => setShowQRModal(false)} style={{ padding: '0.3rem', borderRadius: 8 }}>
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* QR Image Box */}
+              <div style={{
+                background: '#ffffff', borderRadius: 16, padding: '1.25rem',
+                margin: '0 auto 1.25rem', width: 220, height: 220,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
+              }}>
+                {d?.member?.qrCode ? (
+                  <img src={d.member.qrCode} alt="Member QR Pass" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                ) : (
+                  <div style={{ color: '#0f172a', fontSize: '0.85rem', fontWeight: 600 }}>
+                    Generating QR Pass...
+                  </div>
+                )}
+              </div>
+
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--color-text-primary)', marginBottom: '0.25rem' }}>
+                {d?.member?.fullName}
+              </h3>
+              <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', fontFamily: 'monospace', marginBottom: '0.75rem' }}>
+                ID: {d?.member?.memberId}
+              </p>
+
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+                padding: '0.3rem 0.75rem', borderRadius: 99, fontSize: '0.75rem', fontWeight: 600,
+                background: d?.member?.membershipStatus === 'active' ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)',
+                color: d?.member?.membershipStatus === 'active' ? '#10b981' : '#ef4444',
+                marginBottom: '1.25rem',
+              }}>
+                Plan: {d?.membership?.planName || 'Standard'} • {d?.member?.membershipStatus?.toUpperCase()}
+              </div>
+
+              <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', lineHeight: 1.4 }}>
+                Show this QR Code to the front desk scanner or tablet to mark your attendance.
+              </p>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
+

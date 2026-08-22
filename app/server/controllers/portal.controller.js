@@ -9,6 +9,7 @@ const Progress = require('../models/Progress.model');
 const User = require('../models/User.model');
 const Settings = require('../models/Settings.model');
 const { generateReceipt } = require('../services/pdf.service');
+const { generateMemberQR } = require('../services/qr.service');
 const razorpayService = require('../services/razorpay.service');
 
 // Helper: get the Member document for the logged-in member user
@@ -24,6 +25,14 @@ const getMember = async (req) => {
 exports.getDashboard = async (req, res) => {
   const member = await getMember(req);
   const gymId = member.gymId;
+
+  // Auto-generate QR code if missing
+  if (!member.qrCode) {
+    try {
+      member.qrCode = await generateMemberQR(member);
+      await member.save();
+    } catch {}
+  }
 
   // Current membership
   const membership = await Membership.findOne({
@@ -90,9 +99,13 @@ exports.getDashboard = async (req, res) => {
     success: true,
     data: {
       member: {
+        _id: member._id,
         fullName: member.fullName,
         memberId: member.memberId,
         photo: member.photo,
+        email: member.email,
+        phone: member.phone,
+        qrCode: member.qrCode,
         membershipStatus: member.membershipStatus,
       },
       membership: membership ? {

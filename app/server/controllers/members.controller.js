@@ -69,6 +69,13 @@ exports.getMember = async (req, res) => {
 
   if (!member) return res.status(404).json({ success: false, message: 'Member not found' });
 
+  if (!member.qrCode) {
+    try {
+      member.qrCode = await generateMemberQR(member);
+      await member.save();
+    } catch {}
+  }
+
   const activeMembership = await Membership.findOne({ memberId: member._id, status: 'active' })
     .populate('planId');
 
@@ -125,9 +132,10 @@ exports.createMember = async (req, res) => {
   }
 
   // Generate QR code
-  const qrCode = await generateMemberQR(member._id.toString());
+  const qrCode = await generateMemberQR(member);
   member.qrCode = qrCode;
   await member.save();
+
 
   await ActivityLog.create({
     gymId,
