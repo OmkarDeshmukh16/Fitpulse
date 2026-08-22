@@ -122,10 +122,11 @@ export default function PortalWorkoutPlanPage() {
                     <div
                       key={exIndex}
                       style={{
-                        display: 'flex', alignItems: 'center', gap: '1rem',
+                        display: 'flex', alignItems: 'center', gap: '0.75rem',
                         padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)',
                         background: 'var(--color-bg-secondary)',
                         border: '1px solid var(--color-bg-border)',
+                        flexWrap: 'wrap',
                       }}
                     >
                       <div style={{

@@ -68,7 +68,7 @@ function PlanForm({ plan, onSubmit, onCancel, isLoading }) {
       <div className="modal slide-up" onClick={e => e.stopPropagation()}>
         <h2 style={{ fontWeight: 700, marginBottom: '1.5rem' }}>{plan?._id ? 'Edit Plan' : 'Create Plan'}</h2>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
             <div className="form-group">
               <label className="label">Plan Name *</label>
               <input className="input" value={form.name} onChange={e => set('name', e.target.value)} required placeholder="Monthly Premium" />
@@ -92,8 +92,8 @@ function PlanForm({ plan, onSubmit, onCancel, isLoading }) {
             <textarea className="input" rows={4} value={typeof form.features === 'string' ? form.features : (form.features || []).join('\n')} onChange={e => set('features', e.target.value)} placeholder="Unlimited access&#10;Locker included&#10;Guest passes" style={{ resize: 'vertical' }} />
           </div>
 
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-            <div className="form-group" style={{ flex: 1 }}>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div className="form-group" style={{ flex: '1 1 180px' }}>
               <label className="label">Status</label>
               <SearchableSelect
                 options={[

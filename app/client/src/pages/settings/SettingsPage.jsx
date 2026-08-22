@@ -36,7 +36,7 @@ function GymProfileTab({ settings }) {
 
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
       <Row label="Gym Name" id="gym-name"><input className="input" id="gym-name" value={form.gymName || ''} onChange={e => set('gymName', e.target.value)} /></Row>
       <Row label="Phone" id="gym-phone"><input className="input" id="gym-phone" value={form.phone || ''} onChange={e => set('phone', e.target.value)} /></Row>
       <Row label="Email" id="gym-email"><input className="input" id="gym-email" type="email" value={form.email || ''} onChange={e => set('email', e.target.value)} /></Row>
@@ -122,7 +122,7 @@ function StaffTab() {
       {showForm && (
         <div className="card" style={{ marginBottom: '1.5rem' }}>
           <h3 style={{ fontWeight: 700, marginBottom: '1rem', fontSize: '0.95rem' }}>Add Staff Member</h3>
-          <form onSubmit={handleAdd} style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
+          <form onSubmit={handleAdd} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
             <div className="form-group">
               <label className="label">Name</label>
               <input className="input" value={form.name} onChange={e => set('name', e.target.value)} required id="staff-name" />
@@ -203,7 +203,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: '0.25rem', background: 'var(--color-bg-secondary)', padding: '0.25rem', borderRadius: 10, border: '1px solid var(--color-bg-border)', width: 'fit-content' }}>
+      <div style={{ display: 'flex', gap: '0.25rem', background: 'var(--color-bg-secondary)', padding: '0.25rem', borderRadius: 10, border: '1px solid var(--color-bg-border)', width: 'fit-content', maxWidth: '100%', overflowX: 'auto' }}>
         {[{ label: 'Gym Profile', icon: Building }, { label: 'System', icon: SettingsIcon }, { label: 'Staff', icon: Users }].map(({ label, icon: Icon }) => (
           <button key={label} id={`settings-tab-${label.toLowerCase().replace(' ', '-')}`} onClick={() => setActiveTab(label)}
             style={{ padding: '0.5rem 1.25rem', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.5rem', background: activeTab === label ? 'var(--color-accent)' : 'transparent', color: activeTab === label ? '#fff' : 'var(--color-text-muted)', transition: 'all 0.2s' }}>

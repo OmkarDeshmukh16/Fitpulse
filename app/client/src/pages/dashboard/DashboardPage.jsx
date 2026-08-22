@@ -86,7 +86,7 @@ export default function DashboardPage() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }} className="fade-in">
       {/* Stats Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(145px, 1fr))', gap: '0.875rem' }}>
         <StatCard icon={Users} label="Total Members" value={stats.totalMembers} color="#6366f1" onClick={() => navigate('/members')} />
         <StatCard icon={UserCheck} label="Active Members" value={stats.activeMembers} color="#10b981" onClick={() => navigate('/members?status=active')} />
         <StatCard icon={UserX} label="Inactive Members" value={stats.inactiveMembers} color="#ef4444" onClick={() => navigate('/members?status=inactive')} />
@@ -99,7 +99,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Charts Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
         {/* Revenue Chart */}
         <div className="card">
           <h3 style={{ fontWeight: 700, marginBottom: '1.25rem', fontSize: '0.95rem' }}>Monthly Revenue</h3>
@@ -134,7 +134,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Bottom Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
         {/* Membership Distribution */}
         <div className="card">
           <h3 style={{ fontWeight: 700, marginBottom: '1.25rem', fontSize: '0.95rem' }}>Membership Status</h3>

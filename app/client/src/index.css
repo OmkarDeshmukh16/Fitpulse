@@ -558,4 +558,61 @@
     color: #34d399;
     border: 1px solid rgba(16, 185, 129, 0.2);
   }
+
+  /* ===================== MOBILE RESPONSIVE MEDIA QUERIES ===================== */
+  @media (max-width: 768px) {
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start !important;
+      gap: 1rem;
+    }
+    .page-header > button,
+    .page-header > a,
+    .page-header > a > button {
+      width: 100%;
+      justify-content: center;
+    }
+    .card {
+      padding: 1.125rem 1rem;
+      border-radius: var(--radius-lg);
+    }
+    .modal {
+      padding: 1.25rem 1rem;
+      max-width: 95vw;
+      border-radius: var(--radius-lg);
+    }
+    .table-container {
+      -webkit-overflow-scrolling: touch;
+      border-radius: var(--radius-md);
+    }
+    .table-container table {
+      min-width: 600px;
+    }
+    .input, select.input {
+      font-size: 16px; /* Prevents auto zoom on iOS Safari */
+      min-height: 42px;
+    }
+    .btn {
+      min-height: 40px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .page-title {
+      font-size: 1.25rem;
+    }
+    .page-subtitle {
+      font-size: 0.8rem;
+    }
+    .card {
+      padding: 1rem 0.875rem;
+    }
+    .modal {
+      padding: 1.125rem 0.875rem;
+    }
+    .stat-card {
+      padding: 0.875rem;
+    }
+  }
 }
+

@@ -52,16 +52,16 @@ export default function PortalDashboardPage() {
         background: 'linear-gradient(135deg, rgba(16,185,129,0.15), rgba(5,150,105,0.05))',
         border: '1px solid rgba(16,185,129,0.2)',
         borderRadius: 'var(--radius-xl)',
-        padding: '2rem 2.5rem',
-        marginBottom: '2rem',
+        padding: '1.5rem',
+        marginBottom: '1.5rem',
         position: 'relative',
         overflow: 'hidden',
       }}>
         <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(16,185,129,0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '0.5rem', color: 'var(--color-text-primary)' }}>
+        <h1 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '0.5rem', color: 'var(--color-text-primary)' }}>
           Welcome back, {d?.member?.fullName?.split(' ')[0] || 'Member'}! 👋
         </h1>
-        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.95rem' }}>
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
           {d?.membership
             ? <>Your <span style={{ color: '#10b981', fontWeight: 600 }}>{d.membership.planName}</span> membership is {d.membership.status}. {d.stats.daysRemaining > 0 ? `${d.stats.daysRemaining} days remaining.` : 'Time to renew!'}</>
             : 'No active membership. Renew now to get started!'
@@ -94,22 +94,22 @@ export default function PortalDashboardPage() {
       </motion.div>
 
       {/* Stat Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.875rem', marginBottom: '1.5rem' }}>
         {stats.map((s, i) => (
           <motion.div key={s.label} {...fadeUp} transition={{ delay: 0.05 * (i + 1) }} className="stat-card" style={{ position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, ${s.color}, transparent)` }} />
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-              <div style={{ width: 40, height: 40, borderRadius: 10, background: s.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <s.icon size={20} color={s.color} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+              <div style={{ width: 34, height: 34, borderRadius: 8, background: s.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <s.icon size={17} color={s.color} />
               </div>
-              <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', fontWeight: 500 }}>{s.label}</span>
+              <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', fontWeight: 500 }}>{s.label}</span>
             </div>
-            <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--color-text-primary)' }}>{s.value}</div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--color-text-primary)' }}>{s.value}</div>
           </motion.div>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
         {/* Quick Actions */}
         <motion.div {...fadeUp} transition={{ delay: 0.25 }} className="card">
           <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '1rem', color: 'var(--color-text-primary)' }}>Quick Actions</h3>

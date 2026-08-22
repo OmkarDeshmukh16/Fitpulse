@@ -804,7 +804,7 @@ function KioskScannerModal({ onClose, onScanSuccess }) {
                 exit={{ opacity: 0, scale: 0.95 }}
               >
                 <div style={{
-                  position: 'relative', width: 340, height: 340, margin: '0 auto 1.5rem',
+                  position: 'relative', width: 'min(340px, 80vw)', height: 'min(340px, 80vw)', margin: '0 auto 1.5rem',
                   borderRadius: 24, overflow: 'hidden', border: '3px solid rgba(16,185,129,0.4)',
                   boxShadow: '0 0 50px rgba(16,185,129,0.2)', background: '#000',
                 }}>
@@ -814,11 +814,11 @@ function KioskScannerModal({ onClose, onScanSuccess }) {
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
                     <div style={{
-                      width: 250, height: 250, border: '2px dashed rgba(16,185,129,0.8)',
-                      borderRadius: 18,
+                      width: 'min(240px, 60vw)', height: 'min(240px, 60vw)', border: '2px dashed rgba(16,185,129,0.8)',
+                      borderRadius: 18, position: 'relative', overflow: 'hidden',
                     }}>
                       <motion.div
-                        animate={{ y: [0, 250, 0] }}
+                        animate={{ y: [0, 240, 0] }}
                         transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
                         style={{ height: 2, background: '#10b981', boxShadow: '0 0 12px #10b981' }}
                       />
@@ -1200,7 +1200,7 @@ export default function AttendancePage() {
       </div>
 
       {/* Live Stats Counters */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.875rem' }}>
         {[
           { label: "Today's Total Check-ins", value: todayCount, color: '#6366f1', icon: Clock, bg: 'rgba(99,102,241,0.1)' },
           { label: 'Currently In Gym', value: inGymCount, color: '#10b981', icon: Zap, bg: 'rgba(16,185,129,0.1)' },

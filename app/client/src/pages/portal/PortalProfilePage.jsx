@@ -108,7 +108,7 @@ export default function PortalProfilePage() {
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
           <button className="btn btn-secondary" onClick={openEdit}>
             <Edit size={16} /> Edit Contact Info
           </button>
@@ -126,7 +126,7 @@ export default function PortalProfilePage() {
       </div>
 
       {/* Grid: Left Column (Digital Pass Card) | Right Column (Details) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 360px) 1fr', gap: '1.75rem', alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', alignItems: 'start' }}>
         {/* LEFT: DIGITAL GYM PASS CARD */}
         <motion.div
           {...fadeUp}

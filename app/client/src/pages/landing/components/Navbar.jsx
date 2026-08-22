@@ -24,7 +24,7 @@ export default function Navbar({ onOpenDemo }) {
 
   return (
     <motion.header
-      className="fixed top-0 left-0 right-0 z-[100] py-3 md:py-4 flex justify-center items-center w-full"
+      className="fixed top-0 left-0 right-0 z-[100] py-3 md:py-4 flex flex-col justify-center items-center w-full"
       style={{
         paddingLeft: 'clamp(12px, 3vw, 60px)',
         paddingRight: 'clamp(12px, 3vw, 60px)',

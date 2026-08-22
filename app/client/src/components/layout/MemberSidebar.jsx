@@ -4,10 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, CreditCard, CalendarCheck, Dumbbell,
   ChevronLeft, ChevronRight, LogOut, Award, Apple, TrendingUp,
-  UserCheck, User, QrCode,
+  UserCheck, User, QrCode, X,
 } from 'lucide-react'
 import { logout, selectGymSettings, selectCurrentUser } from '../../redux/slices/authSlice'
-import { toggleSidebar } from '../../redux/slices/uiSlice'
+import { toggleSidebar, closeMobileSidebar } from '../../redux/slices/uiSlice'
 import { useLogoutMutation } from '../../services/auth.api'
 
 const navItems = [
@@ -22,10 +22,11 @@ const navItems = [
   { to: '/portal/payments', icon: CreditCard, label: 'Payments' },
 ]
 
-export default function MemberSidebar() {
+export default function MemberSidebar({ isMobile }) {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const collapsed = useSelector((s) => s.ui.sidebarCollapsed)
+  const mobileOpen = useSelector((s) => s.ui.mobileSidebarOpen)
   const gymSettings = useSelector(selectGymSettings)
   const user = useSelector(selectCurrentUser)
   const [logoutMutation] = useLogoutMutation()
@@ -33,12 +34,23 @@ export default function MemberSidebar() {
   const handleLogout = async () => {
     try { await logoutMutation().unwrap() } catch {}
     dispatch(logout())
+    if (isMobile) dispatch(closeMobileSidebar())
     navigate('/')
+  }
+
+  const handleNavClick = () => {
+    if (isMobile) {
+      dispatch(closeMobileSidebar())
+    }
   }
 
   return (
     <motion.aside
-      animate={{ width: collapsed ? 72 : 250 }}
+      animate={
+        isMobile
+          ? { x: mobileOpen ? 0 : -320, width: 280 }
+          : { x: 0, width: collapsed ? 72 : 250 }
+      }
       transition={{ duration: 0.25, ease: 'easeInOut' }}
       style={{
         background: 'var(--color-bg-secondary)',
@@ -48,25 +60,25 @@ export default function MemberSidebar() {
         left: 0, top: 0,
         display: 'flex',
         flexDirection: 'column',
-        zIndex: 40,
+        zIndex: isMobile ? 100 : 40,
         overflow: 'hidden',
+        boxShadow: isMobile && mobileOpen ? '0 0 50px rgba(0,0,0,0.8)' : 'none',
       }}
     >
-      {/* Logo */}
-      <div style={{ padding: '1.25rem 1rem', borderBottom: '1px solid var(--color-bg-border)', display: 'flex', alignItems: 'center', gap: '0.75rem', minHeight: 64 }}>
-        <div style={{
-          width: 36, height: 36, borderRadius: 10,
-          background: 'linear-gradient(135deg, #10b981, #059669)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-        }}>
-          <Dumbbell size={18} color="#fff" />
-        </div>
-        <AnimatePresence>
-          {!collapsed && (
+      {/* Logo Header */}
+      <div style={{ padding: '1.25rem 1rem', borderBottom: '1px solid var(--color-bg-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minHeight: 64 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div style={{
+            width: 36, height: 36, borderRadius: 10,
+            background: 'linear-gradient(135deg, #10b981, #059669)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+          }}>
+            <Dumbbell size={18} color="#fff" />
+          </div>
+          {(!collapsed || isMobile) && (
             <motion.div
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }}
               transition={{ duration: 0.2 }}
             >
               <div style={{ fontWeight: 800, fontSize: '1rem', color: 'var(--color-text-primary)', letterSpacing: '-0.02em' }}>
@@ -77,7 +89,18 @@ export default function MemberSidebar() {
               </div>
             </motion.div>
           )}
-        </AnimatePresence>
+        </div>
+
+        {/* Mobile close button */}
+        {isMobile && (
+          <button
+            className="btn btn-ghost"
+            onClick={() => dispatch(closeMobileSidebar())}
+            style={{ padding: '0.35rem', borderRadius: 8 }}
+          >
+            <X size={18} />
+          </button>
+        )}
       </div>
 
       {/* Nav */}
@@ -86,31 +109,28 @@ export default function MemberSidebar() {
           <NavLink
             key={to}
             to={to}
+            onClick={handleNavClick}
             className={({ isActive }) => `member-sidebar-link ${isActive ? 'active' : ''}`}
-            title={collapsed ? label : undefined}
+            title={collapsed && !isMobile ? label : undefined}
           >
             <Icon size={18} style={{ flexShrink: 0 }} />
-            <AnimatePresence>
-              {!collapsed && (
-                <motion.span
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0 }}
-                  style={{ whiteSpace: 'nowrap' }}
-                >
-                  {label}
-                </motion.span>
-              )}
-            </AnimatePresence>
+            {(!collapsed || isMobile) && (
+              <span style={{ whiteSpace: 'nowrap' }}>
+                {label}
+              </span>
+            )}
           </NavLink>
         ))}
       </nav>
 
       {/* Bottom */}
       <div style={{ padding: '0.75rem', borderTop: '1px solid var(--color-bg-border)', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-        {!collapsed && user && (
+        {(!collapsed || isMobile) && user && (
           <div
-            onClick={() => navigate('/portal/profile')}
+            onClick={() => {
+              navigate('/portal/profile')
+              if (isMobile) dispatch(closeMobileSidebar())
+            }}
             style={{
               padding: '0.5rem 0.75rem',
               marginBottom: '0.5rem',
@@ -128,18 +148,20 @@ export default function MemberSidebar() {
             <div style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 500 }}>View My Account & Pass →</div>
           </div>
         )}
-        <button className="member-sidebar-link" onClick={handleLogout} title={collapsed ? 'Logout' : undefined}>
+        <button className="member-sidebar-link" onClick={handleLogout} title={collapsed && !isMobile ? 'Logout' : undefined}>
           <LogOut size={18} style={{ flexShrink: 0 }} />
-          {!collapsed && <span>Logout</span>}
+          {(!collapsed || isMobile) && <span>Logout</span>}
         </button>
-        <button
-          className="member-sidebar-link"
-          onClick={() => dispatch(toggleSidebar())}
-          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        >
-          {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-          {!collapsed && <span>Collapse</span>}
-        </button>
+        {!isMobile && (
+          <button
+            className="member-sidebar-link"
+            onClick={() => dispatch(toggleSidebar())}
+            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+            {!collapsed && <span>Collapse</span>}
+          </button>
+        )}
       </div>
     </motion.aside>
   )

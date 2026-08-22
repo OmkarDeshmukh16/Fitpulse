@@ -69,7 +69,7 @@ function RecordPaymentModal({ onClose }) {
             />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
             <div className="form-group">
               <label className="label">Total Amount (₹) *</label>
               <input
@@ -218,8 +218,8 @@ export default function PaymentsPage() {
       </div>
 
       {/* Filters with SearchableSelect */}
-      <div style={{ display: 'flex', gap: '0.75rem', maxWidth: 450 }}>
-        <div style={{ flex: 1 }}>
+      <div style={{ display: 'flex', gap: '0.75rem', maxWidth: 450, flexWrap: 'wrap' }}>
+        <div style={{ flex: '1 1 180px', minWidth: 150 }}>
           <SearchableSelect
             options={statusOptions}
             value={statusFilter}
@@ -232,7 +232,7 @@ export default function PaymentsPage() {
             placeholder="Filter Status"
           />
         </div>
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: '1 1 180px', minWidth: 150 }}>
           <SearchableSelect
             options={methodOptions}
             value={methodFilter}

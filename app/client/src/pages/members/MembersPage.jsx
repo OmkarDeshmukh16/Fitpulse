@@ -62,8 +62,8 @@ export default function MembersPage() {
       </div>
 
       {/* Filters */}
-      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-        <div style={{ position: 'relative', flex: 1, maxWidth: 320 }}>
+      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div style={{ position: 'relative', flex: '1 1 220px', minWidth: 200 }}>
           <Search size={15} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
           <input
             className="input"
@@ -74,7 +74,7 @@ export default function MembersPage() {
             id="member-search"
           />
         </div>
-        <div style={{ minWidth: 170 }}>
+        <div style={{ flex: '1 1 160px', minWidth: 150 }}>
           <SearchableSelect
             options={[
               { value: '', label: 'All Status' },
