@@ -252,36 +252,62 @@ function QRScannerModal({ onClose, onScanSuccess }) {
     const initScanner = async () => {
       try {
         setCameraError('')
-        const devices = await Html5Qrcode.getCameras()
-        if (!devices || devices.length === 0) {
-          setCameraError('No camera found on this device. You can upload a QR image instead.')
-          return
-        }
-
-        setCameras(devices)
-        const preferredCam = devices.find(d => /back|rear|environment/i.test(d.label)) || devices[0]
-        const camId = selectedCamera || preferredCam.id
-        setSelectedCamera(camId)
-
         html5QrCode = new Html5Qrcode(readerElementId)
         scannerRef.current = html5QrCode
 
-        await html5QrCode.start(
-          camId,
-          {
-            fps: 12,
-            qrbox: { width: 240, height: 240 },
-            aspectRatio: 1.0,
+        const config = {
+          fps: 15,
+          qrbox: (viewfinderWidth, viewfinderHeight) => {
+            const minEdge = Math.min(viewfinderWidth, viewfinderHeight)
+            const qrboxSize = Math.max(160, Math.floor(minEdge * 0.72))
+            return { width: qrboxSize, height: qrboxSize }
           },
-          (decodedText) => {
-            handleProcessQR(decodedText)
+          aspectRatio: undefined,
+          videoConstraints: {
+            facingMode: { ideal: 'environment' },
+            focusMode: { ideal: 'continuous' },
           },
-          () => {} // ignore frame parse failures
-        )
+        }
+
+        // 1. Direct camera start using facingMode (works on all mobile Safari/Chrome browsers without prior getCameras permissions)
+        try {
+          if (selectedCamera) {
+            await html5QrCode.start(
+              selectedCamera,
+              config,
+              (decodedText) => handleProcessQR(decodedText),
+              () => {}
+            )
+          } else {
+            await html5QrCode.start(
+              { facingMode: 'environment' },
+              config,
+              (decodedText) => handleProcessQR(decodedText),
+              () => {}
+            )
+          }
+        } catch (envErr) {
+          // Fallback to front camera or default
+          await html5QrCode.start(
+            { facingMode: 'user' },
+            config,
+            (decodedText) => handleProcessQR(decodedText),
+            () => {}
+          )
+        }
+
         setIsScanning(true)
+
+        // After camera is started and permission is granted, query available cameras
+        try {
+          const devices = await Html5Qrcode.getCameras()
+          if (devices && devices.length > 0) {
+            setCameras(devices)
+          }
+        } catch {}
       } catch (err) {
         console.error('Camera init error:', err)
-        setCameraError(err?.message || 'Could not access camera. Please check camera permissions.')
+        setCameraError(err?.message || 'Could not access camera. Please allow camera permissions or upload an image.')
         setIsScanning(false)
       }
     }
@@ -678,9 +704,12 @@ function QRScannerModal({ onClose, onScanSuccess }) {
 // ─────────────────────────────────────────────────────────────
 // 2. KIOSK / DESK SELF-SCAN FULLSCREEN MODE
 // ─────────────────────────────────────────────────────────────
+// 2. FULLSCREEN SELF-SERVICE KIOSK SCANNER (Continuous scanning without unmounting camera)
+// ─────────────────────────────────────────────────────────────
 function KioskScannerModal({ onClose, onScanSuccess }) {
   const [time, setTime] = useState(new Date())
   const [scannedMember, setScannedMember] = useState(null)
+  const [cameraError, setCameraError] = useState('')
   const [checkInQR] = useCheckInQRMutation()
   const scannerRef = useRef(null)
   const isCooldownRef = useRef(false)
@@ -694,44 +723,63 @@ function KioskScannerModal({ onClose, onScanSuccess }) {
     let html5QrCode = null
     const timer = setTimeout(async () => {
       try {
+        setCameraError('')
         html5QrCode = new Html5Qrcode('kiosk-reader-viewport')
         scannerRef.current = html5QrCode
-        await html5QrCode.start(
-          { facingMode: 'user' },
-          { fps: 15, qrbox: { width: 300, height: 300 }, aspectRatio: 1.0 },
-          async (decodedText) => {
-            if (isCooldownRef.current) return
-            isCooldownRef.current = true
 
-            try {
-              const res = await checkInQR({ qrData: decodedText, mode: 'auto' }).unwrap()
-              playSound(res.action === 'checkout' ? 'checkout' : 'success')
-              setScannedMember({
-                member: res.member,
-                action: res.action,
-                message: res.message,
-                time: new Date(),
-              })
-              if (onScanSuccess) onScanSuccess(res)
-            } catch (err) {
-              playSound('error')
-              setScannedMember({
-                error: true,
-                message: err?.data?.message || 'Invalid Pass / Member not found',
-                member: err?.data?.member || null,
-                time: new Date(),
-              })
-            } finally {
-              setTimeout(() => {
-                setScannedMember(null)
-                isCooldownRef.current = false
-              }, 3500)
-            }
+        const config = {
+          fps: 15,
+          qrbox: (viewfinderWidth, viewfinderHeight) => {
+            const minEdge = Math.min(viewfinderWidth, viewfinderHeight)
+            const qrboxSize = Math.max(160, Math.floor(minEdge * 0.72))
+            return { width: qrboxSize, height: qrboxSize }
           },
-          () => {}
-        )
+          aspectRatio: undefined,
+          videoConstraints: {
+            facingMode: { ideal: 'user' },
+            focusMode: { ideal: 'continuous' },
+          },
+        }
+
+        const handleKioskDecoded = async (decodedText) => {
+          if (isCooldownRef.current) return
+          isCooldownRef.current = true
+
+          try {
+            const res = await checkInQR({ qrData: decodedText, mode: 'auto' }).unwrap()
+            playSound(res.action === 'checkout' ? 'checkout' : 'success')
+            setScannedMember({
+              member: res.member,
+              action: res.action,
+              message: res.message,
+              time: new Date(),
+            })
+            if (onScanSuccess) onScanSuccess(res)
+          } catch (err) {
+            playSound('error')
+            setScannedMember({
+              error: true,
+              message: err?.data?.message || 'Invalid Pass / Member not found',
+              member: err?.data?.member || null,
+              time: new Date(),
+            })
+          } finally {
+            setTimeout(() => {
+              setScannedMember(null)
+              isCooldownRef.current = false
+            }, 3200)
+          }
+        }
+
+        try {
+          await html5QrCode.start({ facingMode: 'user' }, config, handleKioskDecoded, () => {})
+        } catch (userErr) {
+          // Fallback to back camera / default
+          await html5QrCode.start({ facingMode: 'environment' }, config, handleKioskDecoded, () => {})
+        }
       } catch (e) {
         console.error('Kiosk camera error:', e)
+        setCameraError(e?.message || 'Could not access camera for kiosk mode. Please verify camera permissions.')
       }
     }, 150)
 
@@ -745,6 +793,7 @@ function KioskScannerModal({ onClose, onScanSuccess }) {
             scannerRef.current.clear()
           }
         } catch {}
+        scannerRef.current = null
       }
     }
   }, [])
@@ -793,75 +842,109 @@ function KioskScannerModal({ onClose, onScanSuccess }) {
       </div>
 
       {/* Kiosk Body */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
-        <div style={{ maxWidth: 500, width: '100%', textAlign: 'center' }}>
-          <AnimatePresence mode="wait">
-            {!scannedMember ? (
-              <motion.div
-                key="scanning"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-              >
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem', position: 'relative' }}>
+        <div style={{ maxWidth: 520, width: '100%', textAlign: 'center', position: 'relative' }}>
+          
+          {/* CAMERA CONTAINER (PERMANENTLY MOUNTED TO PREVENT BLACK SCREEN) */}
+          <div style={{
+            position: 'relative', width: 'min(340px, 80vw)', height: 'min(340px, 80vw)', margin: '0 auto 1.5rem',
+            borderRadius: 24, overflow: 'hidden',
+            border: `3px solid ${scannedMember ? (scannedMember.error ? '#ef4444' : scannedMember.action === 'checkout' ? '#f59e0b' : '#10b981') : 'rgba(16,185,129,0.4)'}`,
+            boxShadow: `0 0 50px ${scannedMember ? (scannedMember.error ? 'rgba(239,68,68,0.3)' : scannedMember.action === 'checkout' ? 'rgba(245,158,11,0.3)' : 'rgba(16,185,129,0.3)') : 'rgba(16,185,129,0.2)'}`,
+            background: '#000',
+            transition: 'border-color 0.3s, box-shadow 0.3s',
+          }}>
+            <div id="kiosk-reader-viewport" style={{ width: '100%', height: '100%' }} />
+            
+            {/* Live Scan Guide Overlay (hidden while showing member result) */}
+            {!scannedMember && (
+              <div style={{
+                position: 'absolute', inset: 0, pointerEvents: 'none',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
                 <div style={{
-                  position: 'relative', width: 'min(340px, 80vw)', height: 'min(340px, 80vw)', margin: '0 auto 1.5rem',
-                  borderRadius: 24, overflow: 'hidden', border: '3px solid rgba(16,185,129,0.4)',
-                  boxShadow: '0 0 50px rgba(16,185,129,0.2)', background: '#000',
+                  width: 'min(240px, 60vw)', height: 'min(240px, 60vw)', border: '2px dashed rgba(16,185,129,0.8)',
+                  borderRadius: 18, position: 'relative', overflow: 'hidden',
                 }}>
-                  <div id="kiosk-reader-viewport" style={{ width: '100%', height: '100%' }} />
-                  <div style={{
-                    position: 'absolute', inset: 0, pointerEvents: 'none',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    <div style={{
-                      width: 'min(240px, 60vw)', height: 'min(240px, 60vw)', border: '2px dashed rgba(16,185,129,0.8)',
-                      borderRadius: 18, position: 'relative', overflow: 'hidden',
-                    }}>
-                      <motion.div
-                        animate={{ y: [0, 240, 0] }}
-                        transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
-                        style={{ height: 2, background: '#10b981', boxShadow: '0 0 12px #10b981' }}
-                      />
-                    </div>
-                  </div>
+                  <motion.div
+                    animate={{ y: [0, 240, 0] }}
+                    transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+                    style={{ height: 2, background: '#10b981', boxShadow: '0 0 12px #10b981' }}
+                  />
                 </div>
-                <h3 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '0.4rem', color: '#fff' }}>
-                  Scan Your Member QR Code
-                </h3>
-                <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
-                  Hold your digital membership pass or card up to the camera
-                </p>
-              </motion.div>
-            ) : (
+              </div>
+            )}
+
+            {/* Error Message if camera failed to start */}
+            {cameraError && (
+              <div style={{
+                position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.85)',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                padding: '1.5rem', gap: '0.75rem',
+              }}>
+                <AlertCircle size={36} color="#ef4444" />
+                <p style={{ fontSize: '0.85rem', color: '#fca5a5' }}>{cameraError}</p>
+              </div>
+            )}
+          </div>
+
+          {/* STANDBY INSTRUCTIONS (WHEN NO SCAN IS ACTIVE) */}
+          {!scannedMember ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <h3 style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: '0.4rem', color: '#fff' }}>
+                Scan Your Member QR Code
+              </h3>
+              <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
+                Hold your digital membership pass or card up to the camera
+              </p>
+            </motion.div>
+          ) : null}
+
+          {/* SCANNED MEMBER RESULT OVERLAY (SLIDES IN ON SCAN, DISMISSES AUTOMATICALLY) */}
+          <AnimatePresence>
+            {scannedMember && (
               <motion.div
-                key="result"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
+                initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                transition={{ type: 'spring', stiffness: 350, damping: 25 }}
                 style={{
-                  background: 'var(--color-bg-card)',
-                  padding: '2.5rem', borderRadius: 28,
+                  position: 'absolute',
+                  top: 0, left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '100%',
+                  maxWidth: 460,
+                  background: 'rgba(18, 18, 42, 0.96)',
+                  backdropFilter: 'blur(20px)',
+                  padding: '2rem 1.5rem',
+                  borderRadius: 28,
                   border: `2px solid ${scannedMember.error ? '#ef4444' : scannedMember.action === 'checkout' ? '#f59e0b' : '#10b981'}`,
-                  boxShadow: `0 0 60px ${scannedMember.error ? 'rgba(239,68,68,0.3)' : scannedMember.action === 'checkout' ? 'rgba(245,158,11,0.3)' : 'rgba(16,185,129,0.3)'}`,
+                  boxShadow: `0 25px 60px rgba(0,0,0,0.8), 0 0 50px ${scannedMember.error ? 'rgba(239,68,68,0.3)' : scannedMember.action === 'checkout' ? 'rgba(245,158,11,0.3)' : 'rgba(16,185,129,0.3)'}`,
+                  zIndex: 20,
                 }}
               >
                 <div style={{
-                  width: 90, height: 90, borderRadius: '50%', margin: '0 auto 1.25rem',
+                  width: 80, height: 80, borderRadius: '50%', margin: '0 auto 1rem',
                   background: scannedMember.error ? 'rgba(239,68,68,0.2)' : scannedMember.action === 'checkout' ? 'rgba(245,158,11,0.2)' : 'rgba(16,185,129,0.2)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.5rem',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2.25rem',
+                  border: `2px solid ${scannedMember.error ? '#ef4444' : scannedMember.action === 'checkout' ? '#f59e0b' : '#10b981'}`,
                 }}>
                   {scannedMember.member?.photo ? (
                     <img src={scannedMember.member.photo} alt="" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
                   ) : scannedMember.error ? (
-                    <AlertCircle size={48} color="#ef4444" />
+                    <AlertCircle size={40} color="#ef4444" />
                   ) : scannedMember.action === 'checkout' ? (
-                    <LogOut size={48} color="#f59e0b" />
+                    <LogOut size={40} color="#f59e0b" />
                   ) : (
-                    <Check size={48} color="#10b981" />
+                    <Check size={40} color="#10b981" />
                   )}
                 </div>
 
-                <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#fff', marginBottom: '0.25rem' }}>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#fff', marginBottom: '0.25rem' }}>
                   {scannedMember.member?.fullName || (scannedMember.error ? 'Scan Failed' : 'Welcome!')}
                 </h2>
                 <p style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '1rem' }}>
@@ -869,12 +952,16 @@ function KioskScannerModal({ onClose, onScanSuccess }) {
                 </p>
 
                 <div style={{
-                  padding: '0.75rem 1.5rem', borderRadius: 99, display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                  padding: '0.65rem 1.25rem', borderRadius: 99, display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
                   background: scannedMember.error ? 'rgba(239,68,68,0.15)' : scannedMember.action === 'checkout' ? 'rgba(245,158,11,0.15)' : 'rgba(16,185,129,0.15)',
                   color: scannedMember.error ? '#ef4444' : scannedMember.action === 'checkout' ? '#f59e0b' : '#10b981',
-                  fontWeight: 700, fontSize: '0.95rem',
+                  fontWeight: 700, fontSize: '0.9rem',
                 }}>
                   {scannedMember.message}
+                </div>
+
+                <div style={{ marginTop: '1rem', fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+                  Ready for next member scan in a moment...
                 </div>
               </motion.div>
             )}

@@ -614,5 +614,27 @@
       padding: 0.875rem;
     }
   }
+
+  /* HTML5-QRCode Mobile Camera Video Rendering Fixes */
+  #qr-reader-viewport,
+  #kiosk-reader-viewport {
+    width: 100% !important;
+    height: 100% !important;
+    position: relative;
+    overflow: hidden;
+  }
+  #qr-reader-viewport video,
+  #kiosk-reader-viewport video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+    border-radius: inherit;
+  }
+  #qr-reader-viewport canvas,
+  #kiosk-reader-viewport canvas {
+    display: none !important;
+  }
 }
+
 
