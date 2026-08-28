@@ -30,11 +30,10 @@ export default function Navbar({ onOpenDemo }) {
 
   return (
     <motion.header
-      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${
-        scrolled
+      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${scrolled
           ? 'bg-[rgba(5,5,5,0.85)] backdrop-blur-xl border-b border-white/[0.06] shadow-[0_4px_30px_rgba(0,0,0,0.6)]'
           : 'bg-transparent'
-      }`}
+        }`}
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
@@ -76,9 +75,8 @@ export default function Navbar({ onOpenDemo }) {
           {links.map((link, idx) => (
             <button
               key={link.name}
-              className={`relative text-[12px] font-medium transition-all duration-300 cursor-none group ${
-                hoveredIndex === idx ? 'text-white' : 'text-white/60 hover:text-white'
-              }`}
+              className={`relative text-[12px] font-medium transition-all duration-300 cursor-none group ${hoveredIndex === idx ? 'text-white' : 'text-white/60 hover:text-white'
+                }`}
               style={{ fontFamily: 'Satoshi, sans-serif' }}
               onMouseEnter={() => setHoveredIndex(idx)}
               onMouseLeave={() => setHoveredIndex(null)}

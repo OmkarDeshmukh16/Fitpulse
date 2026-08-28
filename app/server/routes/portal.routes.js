@@ -5,6 +5,8 @@ const {
   getDashboard,
   getProfile,
   updateProfile,
+  getMyBodyStats,
+  updateMyBodyStats,
   getMembership,
   getAttendance,
   getWorkoutPlan,
@@ -26,6 +28,10 @@ router.use(authenticate, authorize('member'));
 // Profile / Account
 router.get('/profile', getProfile);
 router.put('/profile', updateProfile);
+
+// Body Stats
+router.get('/body-stats', getMyBodyStats);
+router.put('/body-stats', updateMyBodyStats);
 
 // Dashboard
 router.get('/dashboard', getDashboard);

@@ -589,3 +589,60 @@ exports.updateProfile = async (req, res) => {
   });
 };
 
+// ─────────────────────────────────────────────
+// GET /api/portal/body-stats
+// ─────────────────────────────────────────────
+exports.getMyBodyStats = async (req, res) => {
+  const member = await getMember(req);
+  res.json({
+    success: true,
+    data: member.bodyStats || null,
+  });
+};
+
+// ─────────────────────────────────────────────
+// PUT /api/portal/body-stats
+// ─────────────────────────────────────────────
+exports.updateMyBodyStats = async (req, res) => {
+  const member = await getMember(req);
+  const { age, gender, weightKg, heightCm, activityLevel } = req.body;
+
+  const numAge = Number(age);
+  const numWeight = Number(weightKg);
+  const numHeight = Number(heightCm);
+
+  if (isNaN(numAge) || numAge < 10 || numAge > 100) {
+    return res.status(400).json({ success: false, message: 'Age must be between 10 and 100 years' });
+  }
+  if (!['male', 'female'].includes(gender)) {
+    return res.status(400).json({ success: false, message: 'Gender must be male or female' });
+  }
+  if (isNaN(numWeight) || numWeight < 20 || numWeight > 300) {
+    return res.status(400).json({ success: false, message: 'Weight must be between 20 and 300 kg' });
+  }
+  if (isNaN(numHeight) || numHeight < 100 || numHeight > 250) {
+    return res.status(400).json({ success: false, message: 'Height must be between 100 and 250 cm' });
+  }
+  const validLevels = ['sedentary', 'light', 'moderate', 'active', 'very_active'];
+  if (!validLevels.includes(activityLevel)) {
+    return res.status(400).json({ success: false, message: 'Invalid activity level' });
+  }
+
+  member.bodyStats = {
+    age: numAge,
+    gender,
+    weightKg: numWeight,
+    heightCm: numHeight,
+    activityLevel,
+    updatedAt: new Date(),
+  };
+
+  await member.save();
+
+  res.json({
+    success: true,
+    message: 'Body stats updated successfully',
+    data: member.bodyStats,
+  });
+};
+

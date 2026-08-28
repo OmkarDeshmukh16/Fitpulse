@@ -22,6 +22,7 @@ import PaymentsPage from './pages/payments/PaymentsPage'
 import ReportsPage from './pages/reports/ReportsPage'
 import SettingsPage from './pages/settings/SettingsPage'
 import SuperAdminDashboardPage from './pages/superadmin/SuperAdminDashboardPage'
+import TemplatesPage from './pages/templates/TemplatesPage'
 
 // Member Portal Pages
 import PortalDashboardPage from './pages/portal/PortalDashboardPage'
@@ -33,6 +34,7 @@ import PortalProgressPage from './pages/portal/PortalProgressPage'
 import PortalPTSessionsPage from './pages/portal/PortalPTSessionsPage'
 import PortalPaymentsPage from './pages/portal/PortalPaymentsPage'
 import PortalProfilePage from './pages/portal/PortalProfilePage'
+import PortalTemplateLibraryPage from './pages/portal/PortalTemplateLibraryPage'
 
 // Lazy-load the landing page so Three.js/3D bundle doesn't affect dashboard load time
 const LandingPage = lazy(() => import('./pages/landing/LandingPage'))
@@ -80,6 +82,7 @@ export default function App() {
               <Route path="/members/:id" element={<MemberDetailPage />} />
               <Route path="/members/:id/edit" element={<EditMemberPage />} />
               <Route path="/plans" element={<PlansPage />} />
+              <Route path="/templates" element={<TemplatesPage />} />
               <Route path="/attendance" element={<AttendancePage />} />
               <Route path="/payments" element={<PaymentsPage />} />
               <Route path="/reports" element={<ReportsPage />} />
@@ -95,6 +98,7 @@ export default function App() {
               <Route path="/portal/attendance" element={<PortalAttendancePage />} />
               <Route path="/portal/workout-plan" element={<PortalWorkoutPlanPage />} />
               <Route path="/portal/diet-plan" element={<PortalDietPlanPage />} />
+              <Route path="/portal/templates" element={<PortalTemplateLibraryPage />} />
               <Route path="/portal/progress" element={<PortalProgressPage />} />
               <Route path="/portal/pt-sessions" element={<PortalPTSessionsPage />} />
               <Route path="/portal/payments" element={<PortalPaymentsPage />} />

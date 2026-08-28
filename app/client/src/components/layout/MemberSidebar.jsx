@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, CreditCard, CalendarCheck, Dumbbell,
   ChevronLeft, ChevronRight, LogOut, Award, Apple, TrendingUp,
-  UserCheck, User, QrCode, X,
+  UserCheck, User, QrCode, X, BookOpen,
 } from 'lucide-react'
 import { logout, selectGymSettings, selectCurrentUser } from '../../redux/slices/authSlice'
 import { toggleSidebar, closeMobileSidebar } from '../../redux/slices/uiSlice'
@@ -17,6 +17,7 @@ const navItems = [
   { to: '/portal/attendance', icon: CalendarCheck, label: 'Attendance' },
   { to: '/portal/workout-plan', icon: Dumbbell, label: 'Workout Plan' },
   { to: '/portal/diet-plan', icon: Apple, label: 'Diet Plan' },
+  { to: '/portal/templates', icon: BookOpen, label: 'Template Library' },
   { to: '/portal/progress', icon: TrendingUp, label: 'Progress' },
   { to: '/portal/pt-sessions', icon: UserCheck, label: 'PT Sessions' },
   { to: '/portal/payments', icon: CreditCard, label: 'Payments' },

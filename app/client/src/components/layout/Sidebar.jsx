@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, Users, CreditCard, CalendarCheck, BarChart3,
-  Settings, Dumbbell, ChevronLeft, ChevronRight, LogOut, Shield, X
+  Settings, Dumbbell, ChevronLeft, ChevronRight, LogOut, Shield, X, Layers
 } from 'lucide-react'
 import { logout, selectGymSettings, selectCurrentUser } from '../../redux/slices/authSlice'
 import { toggleSidebar, closeMobileSidebar } from '../../redux/slices/uiSlice'
@@ -13,6 +13,7 @@ const baseNavItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/members', icon: Users, label: 'Members' },
   { to: '/plans', icon: Dumbbell, label: 'Plans' },
+  { to: '/templates', icon: Layers, label: 'Templates', roles: ['superadmin', 'gymowner', 'manager', 'trainer'] },
   { to: '/attendance', icon: CalendarCheck, label: 'Attendance' },
   { to: '/payments', icon: CreditCard, label: 'Payments' },
   { to: '/reports', icon: BarChart3, label: 'Reports' },
@@ -35,9 +36,11 @@ export default function Sidebar({ isMobile }) {
     navigate('/')
   }
 
-  const navItems = user?.role === 'superadmin'
+  const rawNavItems = user?.role === 'superadmin'
     ? [{ to: '/superadmin', icon: Shield, label: 'Super Admin' }, ...baseNavItems]
     : baseNavItems
+
+  const navItems = rawNavItems.filter((item) => !item.roles || item.roles.includes(user?.role))
 
   const handleNavClick = () => {
     if (isMobile) {

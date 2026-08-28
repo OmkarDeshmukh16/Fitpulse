@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const foodItemSchema = new mongoose.Schema({
-  name: { type: String, required: true },
+  name: { type: String, trim: true, default: 'Food Item' },
   quantity: { type: String, default: '' }, // e.g. "200g", "1 cup"
   calories: { type: Number, default: 0 },
   protein: { type: Number, default: 0 }, // grams
@@ -10,7 +10,7 @@ const foodItemSchema = new mongoose.Schema({
 }, { _id: false });
 
 const mealSchema = new mongoose.Schema({
-  mealName: { type: String, required: true }, // e.g. "Breakfast", "Pre-Workout"
+  mealName: { type: String, trim: true, default: 'Meal' }, // e.g. "Breakfast", "Pre-Workout"
   time: { type: String, default: '' }, // e.g. "7:00 AM"
   items: [foodItemSchema],
   notes: { type: String, default: '' },
@@ -20,9 +20,9 @@ const mealSchema = new mongoose.Schema({
 const dietPlanSchema = new mongoose.Schema(
   {
     gymId: { type: mongoose.Schema.Types.ObjectId, ref: 'Settings', required: true },
-    memberId: { type: mongoose.Schema.Types.ObjectId, ref: 'Member', required: true },
+    memberId: { type: mongoose.Schema.Types.ObjectId, ref: 'Member', default: null },
     trainerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
-    name: { type: String, required: true, trim: true },
+    name: { type: String, trim: true, default: '' },
     goal: { type: String, enum: ['weight_loss', 'muscle_gain', 'maintenance', 'lean_bulk', 'other'], default: 'maintenance' },
     dailyCalorieTarget: { type: Number, default: 2000 },
     dailyProteinTarget: { type: Number, default: 0 },
@@ -33,10 +33,20 @@ const dietPlanSchema = new mongoose.Schema(
     startDate: { type: Date, default: Date.now },
     endDate: { type: Date, default: null },
     isActive: { type: Boolean, default: true },
+    isTemplate: { type: Boolean, default: false },
+    templateName: { type: String, default: '' },
+    templateDescription: { type: String, default: '' },
+    goalTag: {
+      type: String,
+      enum: ['weight_loss', 'muscle_gain', 'maintenance', 'lean_bulk', 'other'],
+      default: 'maintenance',
+    },
+    isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
 
 dietPlanSchema.index({ gymId: 1, memberId: 1, isActive: 1 });
+dietPlanSchema.index({ gymId: 1, isTemplate: 1, isDeleted: 1 });
 
 module.exports = mongoose.model('DietPlan', dietPlanSchema);
