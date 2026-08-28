@@ -8,10 +8,11 @@
  * @param {number} params.weightKg - Weight in kilograms (20-300)
  * @param {number} params.heightCm - Height in centimeters (100-250)
  * @param {string} params.activityLevel - 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active'
+ * @param {string} [params.goal='maintenance'] - 'weight_loss' | 'muscle_gain' | 'maintenance' | 'lean_bulk' | 'other'
  *
  * @returns {Object} { isValid: boolean, errors: Object, result: Object|null }
  */
-export function calculateNutritionNeeds({ age, gender, weightKg, heightCm, activityLevel }) {
+export function calculateNutritionNeeds({ age, gender, weightKg, heightCm, activityLevel, goal = 'maintenance' }) {
   const errors = {};
 
   const numAge = Number(age);
@@ -54,6 +55,9 @@ export function calculateNutritionNeeds({ age, gender, weightKg, heightCm, activ
     errors.activityLevel = 'Please select a valid activity level.';
   }
 
+  const validGoals = ['weight_loss', 'muscle_gain', 'maintenance', 'lean_bulk', 'other'];
+  const safeGoal = validGoals.includes(goal) ? goal : 'maintenance';
+
   if (Object.keys(errors).length > 0) {
     return {
       isValid: false,
@@ -71,11 +75,23 @@ export function calculateNutritionNeeds({ age, gender, weightKg, heightCm, activ
   }
 
   const multiplier = activityMultipliers[activityLevel];
-  const caloriesRaw = bmrRaw * multiplier;
-  const proteinGRaw = 1.2 * numWeight;
-  const fatGRaw = (caloriesRaw * 0.27) / 9;
-  const carbsGRaw = Math.max(0, (caloriesRaw - proteinGRaw * 4 - fatGRaw * 9) / 4);
-  const fibreGRaw = (caloriesRaw / 1000) * 14;
+  const maintenanceCaloriesRaw = bmrRaw * multiplier;
+
+  const goalAdjustments = {
+    weight_loss: -500,
+    muscle_gain: 300,
+    lean_bulk: 150,
+    maintenance: 0,
+    other: 0,
+  };
+
+  const goalAdj = goalAdjustments[safeGoal] || 0;
+  const adjustedCaloriesRaw = Math.max(1000, maintenanceCaloriesRaw + goalAdj);
+
+  const proteinGRaw = 1.8 * numWeight;
+  const fatGRaw = (adjustedCaloriesRaw * 0.27) / 9;
+  const carbsGRaw = Math.max(0, (adjustedCaloriesRaw - proteinGRaw * 4 - fatGRaw * 9) / 4);
+  const fibreGRaw = (adjustedCaloriesRaw / 1000) * 14;
   const waterMlRaw = 35 * numWeight + activityWaterBonuses[activityLevel];
 
   return {
@@ -83,12 +99,14 @@ export function calculateNutritionNeeds({ age, gender, weightKg, heightCm, activ
     errors: {},
     result: {
       bmr: Math.round(bmrRaw),
-      calories: Math.round(caloriesRaw),
+      maintenanceCalories: Math.round(maintenanceCaloriesRaw),
+      calories: Math.round(adjustedCaloriesRaw),
       proteinG: Math.round(proteinGRaw),
       fatG: Math.round(fatGRaw),
       carbsG: Math.round(carbsGRaw),
       fibreG: Math.round(fibreGRaw),
       waterMl: Math.round(waterMlRaw),
+      goal: safeGoal,
     },
   };
 }

@@ -36,8 +36,11 @@ const goalBadges = {
 }
 
 export default function PortalTemplateLibraryPage() {
-  const [activeTab, setActiveTab] = useState('workout')
-  const [selectedGoal, setSelectedGoal] = useState('all')
+  const [searchParams] = useSearchParams()
+  const goalParam = searchParams.get('goal')
+
+  const [activeTab, setActiveTab] = useState(goalParam ? 'diet' : 'workout')
+  const [selectedGoal, setSelectedGoal] = useState(goalParam || 'all')
 
   return (
     <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>

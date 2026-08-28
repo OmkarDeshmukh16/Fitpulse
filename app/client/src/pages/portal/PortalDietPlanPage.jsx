@@ -74,7 +74,7 @@ export default function PortalDietPlanPage() {
       </div>
 
       {activeSubTab === 'calculator' ? (
-        <NutritionCalculator />
+        <NutritionCalculator onSelectSuccess={() => setActiveSubTab('plan')} />
       ) : !plan ? (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh', gap: '1rem' }}>
           <div style={{ width: 64, height: 64, borderRadius: 16, background: 'rgba(16,185,129,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

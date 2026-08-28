@@ -44,6 +44,11 @@ const memberSchema = new mongoose.Schema(
         type: String,
         enum: ['sedentary', 'light', 'moderate', 'active', 'very_active'],
       },
+      goal: {
+        type: String,
+        enum: ['weight_loss', 'muscle_gain', 'maintenance', 'lean_bulk', 'other'],
+        default: 'maintenance',
+      },
       updatedAt: { type: Date },
     },
   },

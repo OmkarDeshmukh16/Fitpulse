@@ -605,7 +605,7 @@ exports.getMyBodyStats = async (req, res) => {
 // ─────────────────────────────────────────────
 exports.updateMyBodyStats = async (req, res) => {
   const member = await getMember(req);
-  const { age, gender, weightKg, heightCm, activityLevel } = req.body;
+  const { age, gender, weightKg, heightCm, activityLevel, goal } = req.body;
 
   const numAge = Number(age);
   const numWeight = Number(weightKg);
@@ -627,6 +627,8 @@ exports.updateMyBodyStats = async (req, res) => {
   if (!validLevels.includes(activityLevel)) {
     return res.status(400).json({ success: false, message: 'Invalid activity level' });
   }
+  const validGoals = ['weight_loss', 'muscle_gain', 'maintenance', 'lean_bulk', 'other'];
+  const safeGoal = validGoals.includes(goal) ? goal : 'maintenance';
 
   member.bodyStats = {
     age: numAge,
@@ -634,6 +636,7 @@ exports.updateMyBodyStats = async (req, res) => {
     weightKg: numWeight,
     heightCm: numHeight,
     activityLevel,
+    goal: safeGoal,
     updatedAt: new Date(),
   };
 
