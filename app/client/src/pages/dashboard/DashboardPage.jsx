@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
-  Users, UserCheck, UserX, UserPlus, CalendarCheck, DollarSign,
+  Users, UserCheck, UserX, UserPlus, CalendarCheck, IndianRupee,
   TrendingUp, Clock, AlertTriangle, CakeSlice, RefreshCw,
 } from 'lucide-react'
 import {
@@ -18,7 +18,7 @@ import { format } from 'date-fns'
 
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#3b82f6', '#ef4444']
 
-const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 function StatCard({ icon: Icon, label, value, color, trend, onClick }) {
   return (
@@ -92,7 +92,7 @@ export default function DashboardPage() {
         <StatCard icon={UserX} label="Inactive Members" value={stats.inactiveMembers} color="#ef4444" onClick={() => navigate('/members?status=inactive')} />
         <StatCard icon={UserPlus} label="New This Month" value={stats.newMembersThisMonth} color="#3b82f6" onClick={() => navigate('/members?filter=newThisMonth')} />
         <StatCard icon={CalendarCheck} label="Today's Check-ins" value={stats.todayCheckIns} color="#8b5cf6" onClick={() => navigate('/attendance')} />
-        <StatCard icon={DollarSign} label={`Today's Revenue`} value={stats.todayRevenue != null ? `${sym}${stats.todayRevenue.toLocaleString()}` : null} color="#10b981" onClick={() => navigate('/payments?range=today')} />
+        <StatCard icon={IndianRupee} label={`Today's Revenue`} value={stats.todayRevenue != null ? `${sym}${stats.todayRevenue.toLocaleString()}` : null} color="#10b981" onClick={() => navigate('/payments?range=today')} />
         <StatCard icon={TrendingUp} label="Monthly Revenue" value={stats.monthlyRevenue != null ? `${sym}${stats.monthlyRevenue.toLocaleString()}` : null} color="#6366f1" onClick={() => navigate('/payments?range=month')} />
         <StatCard icon={Clock} label="Pending Dues" value={stats.pendingPayments != null ? `${sym}${stats.pendingPayments.toLocaleString()}` : null} color="#f59e0b" onClick={() => navigate('/payments?status=partial')} />
         <StatCard icon={AlertTriangle} label="Expiring (7 days)" value={stats.expiringMemberships} color="#ef4444" onClick={() => navigate('/reports')} />

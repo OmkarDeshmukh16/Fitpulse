@@ -15,7 +15,7 @@ const chartStyle = {
   contentStyle: { background: '#12122a', border: '1px solid #1e1e38', borderRadius: 10, color: '#f1f5f9', fontSize: 12 },
 }
 
-const tabs = ['Revenue', 'Attendance', 'Expiry', 'Lost Members']
+const tabs = ['Revenue', 'Attendance', 'Expiry', 'Inactive Members']
 
 // Quick API hooks using RTK Query directly
 const { useGetRevenueReportQuery, useGetAttendanceReportQuery, useGetExpiryReportQuery, useGetLostMembersQuery } = apiSlice.injectEndpoints({
@@ -188,7 +188,7 @@ export default function ReportsPage() {
                       </td>
                       <td>{r.planId?.name}</td>
                       <td>{format(new Date(r.endDate), 'dd MMM yyyy')}</td>
-                      <td><span className={`badge ${daysLeft <= 3 ? 'badge-inactive' : 'badge-pending'}`}>{daysLeft}d</span></td>
+                      <td><span className={`badge ${daysLeft <= 3 ? 'badge-inactive' : 'badge-pending'}`}>{daysLeft}</span></td>
                     </tr>
                   )
                 })}
