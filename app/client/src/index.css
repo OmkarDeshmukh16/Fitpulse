@@ -529,4 +529,112 @@
   .spin {
     animation: spin 1s linear infinite;
   }
+
+  /* ===================== MEMBER PORTAL ===================== */
+
+  /* Member sidebar links — emerald accent instead of indigo */
+  .member-sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 1rem;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    transition: all 0.2s;
+    cursor: pointer;
+    border: 1px solid transparent;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+  }
+  .member-sidebar-link:hover {
+    background: var(--color-bg-hover);
+    color: var(--color-text-primary);
+  }
+  .member-sidebar-link.active {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.05));
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+  }
+
+  /* ===================== MOBILE RESPONSIVE MEDIA QUERIES ===================== */
+  @media (max-width: 768px) {
+    .page-header {
+      flex-direction: column;
+      align-items: flex-start !important;
+      gap: 1rem;
+    }
+    .page-header > button,
+    .page-header > a,
+    .page-header > a > button {
+      width: 100%;
+      justify-content: center;
+    }
+    .card {
+      padding: 1.125rem 1rem;
+      border-radius: var(--radius-lg);
+    }
+    .modal {
+      padding: 1.25rem 1rem;
+      max-width: 95vw;
+      border-radius: var(--radius-lg);
+    }
+    .table-container {
+      -webkit-overflow-scrolling: touch;
+      border-radius: var(--radius-md);
+    }
+    .table-container table {
+      min-width: 600px;
+    }
+    .input, select.input {
+      font-size: 16px; /* Prevents auto zoom on iOS Safari */
+      min-height: 42px;
+    }
+    .btn {
+      min-height: 40px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .page-title {
+      font-size: 1.25rem;
+    }
+    .page-subtitle {
+      font-size: 0.8rem;
+    }
+    .card {
+      padding: 1rem 0.875rem;
+    }
+    .modal {
+      padding: 1.125rem 0.875rem;
+    }
+    .stat-card {
+      padding: 0.875rem;
+    }
+  }
+
+  /* HTML5-QRCode Mobile Camera Video Rendering Fixes */
+  #qr-reader-viewport,
+  #kiosk-reader-viewport {
+    width: 100% !important;
+    height: 100% !important;
+    position: relative;
+    overflow: hidden;
+  }
+  #qr-reader-viewport video,
+  #kiosk-reader-viewport video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+    border-radius: inherit;
+  }
+  #qr-reader-viewport canvas,
+  #kiosk-reader-viewport canvas {
+    display: none !important;
+  }
 }
+
+

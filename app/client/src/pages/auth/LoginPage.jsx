@@ -22,6 +22,8 @@ export default function LoginPage() {
       toast.success(`Welcome back, ${res.user.name}!`)
       if (res.user.role === 'superadmin') {
         navigate('/superadmin')
+      } else if (res.user.role === 'member') {
+        navigate('/portal/dashboard')
       } else {
         navigate('/dashboard')
       }

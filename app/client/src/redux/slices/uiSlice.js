@@ -4,6 +4,7 @@ const uiSlice = createSlice({
   name: 'ui',
   initialState: {
     sidebarCollapsed: false,
+    mobileSidebarOpen: false,
     theme: 'dark',
   },
   reducers: {
@@ -13,8 +14,24 @@ const uiSlice = createSlice({
     setSidebarCollapsed: (state, action) => {
       state.sidebarCollapsed = action.payload
     },
+    toggleMobileSidebar: (state) => {
+      state.mobileSidebarOpen = !state.mobileSidebarOpen
+    },
+    setMobileSidebarOpen: (state, action) => {
+      state.mobileSidebarOpen = action.payload
+    },
+    closeMobileSidebar: (state) => {
+      state.mobileSidebarOpen = false
+    },
   },
 })
 
-export const { toggleSidebar, setSidebarCollapsed } = uiSlice.actions
+export const {
+  toggleSidebar,
+  setSidebarCollapsed,
+  toggleMobileSidebar,
+  setMobileSidebarOpen,
+  closeMobileSidebar,
+} = uiSlice.actions
+
 export default uiSlice.reducer

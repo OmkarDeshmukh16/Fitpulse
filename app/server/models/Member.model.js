@@ -35,6 +35,22 @@ const memberSchema = new mongoose.Schema(
     notes: { type: String, default: '' },
     isDeleted: { type: Boolean, default: false },
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null }, // for member portal login
+    bodyStats: {
+      age: { type: Number },
+      gender: { type: String, enum: ['male', 'female'] },
+      weightKg: { type: Number },
+      heightCm: { type: Number },
+      activityLevel: {
+        type: String,
+        enum: ['sedentary', 'light', 'moderate', 'active', 'very_active'],
+      },
+      goal: {
+        type: String,
+        enum: ['weight_loss', 'muscle_gain', 'maintenance', 'lean_bulk', 'other'],
+        default: 'maintenance',
+      },
+      updatedAt: { type: Date },
+    },
   },
   { timestamps: true }
 );

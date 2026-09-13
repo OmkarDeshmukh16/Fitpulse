@@ -3,8 +3,32 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Loader, User } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useGetMemberQuery, useUpdateMemberMutation } from '../../services/members.api'
+import SearchableSelect from '../../components/common/SearchableSelect'
 
-const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
+const BLOOD_GROUPS = [
+  { value: '', label: 'Select Blood Group' },
+  { value: 'A+', label: 'A+' },
+  { value: 'A-', label: 'A-' },
+  { value: 'B+', label: 'B+' },
+  { value: 'B-', label: 'B-' },
+  { value: 'AB+', label: 'AB+' },
+  { value: 'AB-', label: 'AB-' },
+  { value: 'O+', label: 'O+' },
+  { value: 'O-', label: 'O-' },
+]
+
+const GENDERS = [
+  { value: 'male', label: 'Male' },
+  { value: 'female', label: 'Female' },
+  { value: 'other', label: 'Other' },
+]
+
+const STATUSES = [
+  { value: 'active', label: 'Active' },
+  { value: 'inactive', label: 'Inactive' },
+  { value: 'frozen', label: 'Frozen' },
+  { value: 'expired', label: 'Expired' },
+]
 
 function Field({ label, id, error, children }) {
   return (
@@ -119,23 +143,24 @@ export default function EditMemberPage() {
       </div>
 
       <form onSubmit={handleSubmit}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
           {/* Basic Info */}
           <div className="card" style={{ gridColumn: '1 / -1' }}>
             <h3 style={{ fontWeight: 700, marginBottom: '1.25rem', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <User size={16} color="var(--color-accent)" /> Basic Information
             </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem' }}>
               <Field label="Full Name *" id="fullName" error={errors.fullName}>
                 <input className="input" id="fullName" value={form.fullName} onChange={e => set('fullName', e.target.value)} placeholder="John Doe" />
               </Field>
 
               <Field label="Gender *" id="gender" error={errors.gender}>
-                <select className="input" id="gender" value={form.gender} onChange={e => set('gender', e.target.value)}>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                </select>
+                <SearchableSelect
+                  options={GENDERS}
+                  value={form.gender}
+                  onChange={val => set('gender', val)}
+                  id="gender"
+                />
               </Field>
 
               <Field label="Date of Birth" id="dob">
@@ -151,19 +176,22 @@ export default function EditMemberPage() {
               </Field>
 
               <Field label="Blood Group" id="bloodGroup">
-                <select className="input" id="bloodGroup" value={form.bloodGroup} onChange={e => set('bloodGroup', e.target.value)}>
-                  <option value="">Select</option>
-                  {BLOOD_GROUPS.map(b => <option key={b} value={b}>{b}</option>)}
-                </select>
+                <SearchableSelect
+                  options={BLOOD_GROUPS}
+                  value={form.bloodGroup}
+                  onChange={val => set('bloodGroup', val)}
+                  placeholder="Select Blood Group..."
+                  id="bloodGroup"
+                />
               </Field>
 
               <Field label="Membership Status" id="membershipStatus">
-                <select className="input" id="membershipStatus" value={form.membershipStatus} onChange={e => set('membershipStatus', e.target.value)}>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                  <option value="frozen">Frozen</option>
-                  <option value="expired">Expired</option>
-                </select>
+                <SearchableSelect
+                  options={STATUSES}
+                  value={form.membershipStatus}
+                  onChange={val => set('membershipStatus', val)}
+                  id="membershipStatus"
+                />
               </Field>
 
               <Field label="Address" id="address">

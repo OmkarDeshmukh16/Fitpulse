@@ -38,6 +38,30 @@ export const membersApi = apiSlice.injectEndpoints({
       query: (id) => `/members/${id}/payments`,
       providesTags: ['Payment'],
     }),
+    getMemberWorkoutPlan: builder.query({
+      query: (id) => `/members/${id}/workout-plan`,
+      providesTags: ['WorkoutPlan'],
+    }),
+    upsertMemberWorkoutPlan: builder.mutation({
+      query: ({ memberId, ...body }) => ({
+        url: `/members/${memberId}/workout-plan`,
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: ['WorkoutPlan'],
+    }),
+    getMemberDietPlan: builder.query({
+      query: (id) => `/members/${id}/diet-plan`,
+      providesTags: ['DietPlan'],
+    }),
+    upsertMemberDietPlan: builder.mutation({
+      query: ({ memberId, ...body }) => ({
+        url: `/members/${memberId}/diet-plan`,
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: ['DietPlan'],
+    }),
   }),
 })
 
@@ -45,4 +69,7 @@ export const {
   useGetMembersQuery, useGetMemberQuery, useCreateMemberMutation,
   useUpdateMemberMutation, useDeleteMemberMutation, useFreezeMembershipMutation,
   useUnfreezeMembershipMutation, useGetMemberAttendanceQuery, useGetMemberPaymentsQuery,
+  useGetMemberWorkoutPlanQuery, useUpsertMemberWorkoutPlanMutation,
+  useGetMemberDietPlanQuery, useUpsertMemberDietPlanMutation,
 } = membersApi
+

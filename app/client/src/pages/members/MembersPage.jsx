@@ -5,6 +5,7 @@ import { Plus, Search, Filter, UserCheck, UserX, Eye, Edit, Download, Snowflake 
 import toast from 'react-hot-toast'
 import { useGetMembersQuery, useFreezeMembershipMutation } from '../../services/members.api'
 import { format } from 'date-fns'
+import SearchableSelect from '../../components/common/SearchableSelect'
 
 const statusBadge = (status) => {
   const map = { active: 'active', inactive: 'inactive', frozen: 'frozen', expired: 'expired' }
@@ -61,8 +62,8 @@ export default function MembersPage() {
       </div>
 
       {/* Filters */}
-      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-        <div style={{ position: 'relative', flex: 1, maxWidth: 320 }}>
+      <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div style={{ position: 'relative', flex: '1 1 220px', minWidth: 200 }}>
           <Search size={15} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }} />
           <input
             className="input"
@@ -73,31 +74,32 @@ export default function MembersPage() {
             id="member-search"
           />
         </div>
-        <select
-          className="input"
-          style={{ width: 'auto', minWidth: 140 }}
-          value={statusFilter}
-          onChange={(e) => {
-            const val = e.target.value
-            setStatusFilter(val)
-            if (val === 'newThisMonth') {
-              setSearchParams({ filter: 'newThisMonth' })
-            } else if (val) {
-              setSearchParams({ status: val })
-            } else {
-              setSearchParams({})
-            }
-            setPage(1)
-          }}
-          id="member-status-filter"
-        >
-          <option value="">All Status</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-          <option value="newThisMonth">New This Month</option>
-          <option value="frozen">Frozen</option>
-          <option value="expired">Expired</option>
-        </select>
+        <div style={{ flex: '1 1 160px', minWidth: 150 }}>
+          <SearchableSelect
+            options={[
+              { value: '', label: 'All Status' },
+              { value: 'active', label: 'Active' },
+              { value: 'inactive', label: 'Inactive' },
+              { value: 'newThisMonth', label: 'New This Month' },
+              { value: 'frozen', label: 'Frozen' },
+              { value: 'expired', label: 'Expired' },
+            ]}
+            value={statusFilter}
+            onChange={(val) => {
+              setStatusFilter(val)
+              if (val === 'newThisMonth') {
+                setSearchParams({ filter: 'newThisMonth' })
+              } else if (val) {
+                setSearchParams({ status: val })
+              } else {
+                setSearchParams({})
+              }
+              setPage(1)
+            }}
+            placeholder="Filter Status"
+            id="member-status-filter"
+          />
+        </div>
       </div>
 
       {/* Table */}
