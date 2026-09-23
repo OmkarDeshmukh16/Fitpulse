@@ -1,70 +1,79 @@
-const Anthropic = require('@anthropic-ai/sdk');
+const OpenAI = require('openai');
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+// Groq's API is OpenAI-compatible, so the official `openai` SDK works as-is —
+// just point it at Groq's base URL and use a Groq API key (free, no credit card:
+// https://console.groq.com/keys).
+const groq = new OpenAI({
+  apiKey: process.env.GROQ_API_KEY,
+  baseURL: 'https://api.groq.com/openai/v1',
+});
 
-// Cost-effective, fast model — good fit for a member-facing chat feature at scale.
-// Bump to 'claude-sonnet-5' if you want noticeably higher-quality plans and don't
-// mind the higher per-token cost.
-const MODEL = 'claude-haiku-4-5-20251001';
+// Free tier as of writing: ~30 requests/min, daily caps in the thousands depending
+// on model. Llama 3.3 70B is the best-quality model currently on the free tier and
+// supports tool calling. Check console.groq.com/settings/limits for current numbers.
+const MODEL = 'llama-3.3-70b-versatile';
 
 const PLAN_TOOL = {
-  name: 'propose_plan',
-  description:
-    "Call this whenever you are giving the member a concrete diet and/or workout plan (initial generation, or an update after they ask for a change like swapping a meal or changing workout days). Don't call it for pure conversation (e.g. answering a question) with no plan change.",
-  input_schema: {
-    type: 'object',
-    properties: {
-      diet: {
-        type: 'object',
-        properties: {
-          dailyCalories: { type: 'number' },
-          proteinGrams: { type: 'number' },
-          carbsGrams: { type: 'number' },
-          fatGrams: { type: 'number' },
-          fiberGrams: { type: 'number' },
-          meals: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                name: { type: 'string' },
-                items: { type: 'array', items: { type: 'string' } },
-                calories: { type: 'number' },
+  type: 'function',
+  function: {
+    name: 'propose_plan',
+    description:
+      "Call this whenever you are giving the member a concrete diet and/or workout plan (initial generation, or an update after they ask for a change like swapping a meal or changing workout days). Don't call it for pure conversation (e.g. answering a question) with no plan change.",
+    parameters: {
+      type: 'object',
+      properties: {
+        diet: {
+          type: 'object',
+          properties: {
+            dailyCalories: { type: 'number' },
+            proteinGrams: { type: 'number' },
+            carbsGrams: { type: 'number' },
+            fatGrams: { type: 'number' },
+            fiberGrams: { type: 'number' },
+            meals: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string' },
+                  items: { type: 'array', items: { type: 'string' } },
+                  calories: { type: 'number' },
+                },
+                required: ['name', 'items'],
               },
-              required: ['name', 'items'],
             },
+            notes: { type: 'string' },
           },
-          notes: { type: 'string' },
         },
-      },
-      workout: {
-        type: 'object',
-        properties: {
-          daysPerWeek: { type: 'number' },
-          schedule: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                day: { type: 'string' },
-                focus: { type: 'string' },
-                exercises: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      name: { type: 'string' },
-                      sets: { type: 'number' },
-                      reps: { type: 'string' },
+        workout: {
+          type: 'object',
+          properties: {
+            daysPerWeek: { type: 'number' },
+            schedule: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  day: { type: 'string' },
+                  focus: { type: 'string' },
+                  exercises: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        name: { type: 'string' },
+                        sets: { type: 'number' },
+                        reps: { type: 'string' },
+                      },
+                      required: ['name'],
                     },
-                    required: ['name'],
                   },
                 },
+                required: ['day', 'focus', 'exercises'],
               },
-              required: ['day', 'focus', 'exercises'],
             },
+            notes: { type: 'string' },
           },
-          notes: { type: 'string' },
         },
       },
     },
@@ -104,26 +113,31 @@ Guidelines:
  */
 async function continueConversation({ profileSnapshot, goal, medicalConditions, history, userMessage }) {
   const messages = [
+    { role: 'system', content: buildSystemPrompt({ profileSnapshot, goal, medicalConditions }) },
     ...history.map((m) => ({ role: m.role, content: m.content })),
     { role: 'user', content: userMessage },
   ];
 
-  const response = await anthropic.messages.create({
+  const response = await groq.chat.completions.create({
     model: MODEL,
     max_tokens: 1500,
-    system: buildSystemPrompt({ profileSnapshot, goal, medicalConditions }),
     tools: [PLAN_TOOL],
     messages,
   });
 
-  let assistantMessage = '';
+  const choice = response.choices[0].message;
+  let assistantMessage = choice.content || '';
   let planUpdate = null;
 
-  for (const block of response.content) {
-    if (block.type === 'text') {
-      assistantMessage += block.text;
-    } else if (block.type === 'tool_use' && block.name === 'propose_plan') {
-      planUpdate = block.input;
+  const toolCall = choice.tool_calls?.find((t) => t.function.name === 'propose_plan');
+  if (toolCall) {
+    try {
+      planUpdate = JSON.parse(toolCall.function.arguments);
+    } catch {
+      // Occasionally a free-tier model returns slightly malformed JSON — fail soft
+      // rather than crashing the request; the member just won't see a plan update
+      // this turn and can ask again.
+      planUpdate = null;
     }
   }
 

@@ -69,13 +69,35 @@ export default function MemberSidebar({ isMobile }) {
       {/* Logo Header */}
       <div style={{ padding: '1.25rem 1rem', borderBottom: '1px solid var(--color-bg-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', minHeight: 64 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div style={{
-            width: 36, height: 36, borderRadius: 10,
-            background: 'linear-gradient(135deg, #10b981, #059669)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-          }}>
-            <Dumbbell size={18} color="#fff" />
-          </div>
+          {gymSettings?.logo ? (
+            <div style={{
+              width: 36,
+              height: 36,
+              borderRadius: 10,
+              background: 'var(--color-bg-secondary)',
+              border: '1px solid var(--color-bg-border)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              overflow: 'hidden',
+              flexShrink: 0
+            }}>
+              <img
+                src={gymSettings.logo}
+                alt={gymSettings?.gymName || 'Gym Logo'}
+                style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '2px' }}
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
+            </div>
+          ) : (
+            <div style={{
+              width: 36, height: 36, borderRadius: 10,
+              background: 'linear-gradient(135deg, #10b981, #059669)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+            }}>
+              <Dumbbell size={18} color="#fff" />
+            </div>
+          )}
           {(!collapsed || isMobile) && (
             <motion.div
               initial={{ opacity: 0, x: -10 }}

@@ -8,13 +8,14 @@ matching folders and wire up the four things below.
 
 ```bash
 cd app/server
-npm install @anthropic-ai/sdk
+npm install openai
 ```
 
 Add to `app/server/.env`:
 ```
-ANTHROPIC_API_KEY=sk-ant-...
+GROQ_API_KEY=gsk_...
 ```
+Get a free key (no credit card) at https://console.groq.com/keys.
 
 Copy in:
 - `models/AIConversation.model.js`
@@ -81,6 +82,14 @@ already collects so the member isn't asked twice:
   `currentPlan` become the member's *active* plan directly; instead add an "adopt this
   plan" action that copies it into whatever schema your admin-authored plans already use,
   and gate that action on trainer approval.
-- **Model choice**: using `claude-haiku-4-5-20251001` for cost efficiency on a per-message
-  chat feature. If plan quality matters more than cost at your current scale, swap the
-  `MODEL` constant in `ai.service.js` to `claude-sonnet-5`.
+- **Model choice**: using Groq's free tier (`llama-3.3-70b-versatile`) — no cost, but a
+  real ceiling: roughly 30 requests/minute and a daily cap in the low thousands (check
+  current numbers at console.groq.com/settings/limits, they do change). Fine for a
+  student project or early users; if you outgrow it, the `continueConversation` function
+  signature is the same shape as the Claude version, so swapping back to a paid provider
+  later is a small, contained change to `ai.service.js` only — nothing else in the stack
+  needs to change.
+- **Occasional malformed tool output**: free-tier open models are somewhat less reliable
+  than Claude at strictly following the tool schema. The service already fails soft (logs
+  nothing broken, just skips the plan update that turn) — if you see it happening a lot,
+  tightening the tool description or lowering `max_tokens` usually helps.

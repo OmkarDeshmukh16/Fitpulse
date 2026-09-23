@@ -69,8 +69,16 @@ export default function MemberTopbar({ isMobile }) {
       {/* Right actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '0.4rem' : '0.75rem', flexShrink: 0 }}>
         {!isMobile && (
-          <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-            {gymSettings?.gymName || 'Fitpulse'}
+          <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            {gymSettings?.logo && (
+              <img
+                src={gymSettings.logo}
+                alt=""
+                style={{ width: 18, height: 18, borderRadius: 4, objectFit: 'contain' }}
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
+            )}
+            <span>{gymSettings?.gymName || 'Fitpulse'}</span>
           </span>
         )}
 
