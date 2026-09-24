@@ -73,13 +73,23 @@ export default function AddMemberPage() {
     })),
   ]
 
-  const generatePassword = () => {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789'
-    let pwd = 'Fit#'
+  const generateRandomKey = () => {
+    const uppercase = 'ABCDEFGHJKLMNPQRSTUVWXYZ'
+    const lowercase = 'abcdefghijkmnpqrstuvwxyz'
+    const numbers = '23456789'
+    const symbols = '!@#$%'
+    const all = uppercase + lowercase + numbers + symbols
+
+    let token = ''
+    token += uppercase[Math.floor(Math.random() * uppercase.length)]
+    token += lowercase[Math.floor(Math.random() * lowercase.length)]
+    token += numbers[Math.floor(Math.random() * numbers.length)]
+    token += symbols[Math.floor(Math.random() * symbols.length)]
     for (let i = 0; i < 4; i++) {
-      pwd += chars.charAt(Math.floor(Math.random() * chars.length))
+      token += all[Math.floor(Math.random() * all.length)]
     }
-    set('password', pwd)
+    const shuffled = token.split('').sort(() => 0.5 - Math.random()).join('')
+    set('password', shuffled)
     setShowPassword(true)
     toast.success('Generated random password!')
   }
@@ -343,7 +353,7 @@ export default function AddMemberPage() {
                         type={showPassword ? 'text' : 'password'}
                         value={form.password}
                         onChange={e => set('password', e.target.value)}
-                        placeholder="e.g. Fit#2026"
+                        placeholder="Enter password or click Auto"
                         style={{ paddingRight: '2.5rem' }}
                       />
                       <button
@@ -368,7 +378,7 @@ export default function AddMemberPage() {
                     <button
                       type="button"
                       className="btn btn-secondary"
-                      onClick={generatePassword}
+                      onClick={generateRandomKey}
                       title="Generate secure password"
                       style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem', flexShrink: 0 }}
                     >
