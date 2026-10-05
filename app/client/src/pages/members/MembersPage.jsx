@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Plus, Search, Filter, UserCheck, UserX, Eye, Edit, Download, Snowflake } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -13,6 +13,7 @@ const statusBadge = (status) => {
 }
 
 export default function MembersPage() {
+  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const statusParam = searchParams.get('status') || ''
   const filterParam = searchParams.get('filter') || ''
@@ -151,7 +152,7 @@ export default function MembersPage() {
                     <td>{m.joinDate ? format(new Date(m.joinDate), 'dd MMM yyyy') : '—'}</td>
                     <td>{statusBadge(m.membershipStatus)}</td>
                     <td>
-                      <div style={{ display: 'flex', gap: '0.375rem' }}>
+                      <div style={{ display: 'flex', gap: '0.375rem', flexWrap: 'wrap' }}>
                         <Link to={`/members/${m._id}`}>
                           <button className="btn btn-ghost" style={{ padding: '0.375rem' }} title="View"><Eye size={15} /></button>
                         </Link>
@@ -163,6 +164,25 @@ export default function MembersPage() {
                             <Snowflake size={15} />
                           </button>
                         )}
+                        <button
+                          className="btn"
+                          style={{
+                            padding: '0.275rem 0.6rem',
+                            fontSize: '0.75rem',
+                            background: '#ef4444',
+                            color: '#fff',
+                            border: 'none',
+                            borderRadius: 6,
+                            cursor: 'pointer',
+                            fontWeight: 600,
+                            lineHeight: 1,
+                          }}
+                          title="Record Payment"
+                          onClick={() => navigate(`/payments?memberId=${m._id}`)}
+                          id={`payment-btn-${m._id}`}
+                        >
+                          Payment
+                        </button>
                       </div>
                     </td>
                   </motion.tr>

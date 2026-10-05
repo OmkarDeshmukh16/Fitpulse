@@ -4,7 +4,7 @@ import { Plus, Loader, Receipt } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
 import { useGetPaymentsQuery, useCreatePaymentMutation } from '../../services/api'
-import { useGetMembersQuery } from '../../services/members.api'
+import { useGetMembersQuery, useGetMemberQuery } from '../../services/members.api'
 import SearchableSelect from '../../components/common/SearchableSelect'
 
 const methodColors = { cash: '#10b981', card: '#3b82f6', upi: '#8b5cf6', other: '#94a3b8' }
@@ -16,9 +16,9 @@ const PAYMENT_METHODS = [
   { value: 'other', label: 'Other' },
 ]
 
-function RecordPaymentModal({ onClose }) {
+function RecordPaymentModal({ onClose, initialMemberId = '' }) {
   const [form, setForm] = useState({
-    memberId: '',
+    memberId: initialMemberId,
     amount: '',
     paidAmount: '',
     method: 'cash',
@@ -34,6 +34,23 @@ function RecordPaymentModal({ onClose }) {
     label: m.fullName,
     sublabel: `${m.memberId}${m.phone ? ` • ${m.phone}` : ''}`,
   }))
+
+  // Fetch full member data to read plan info
+  const { data: selectedMemberData, isFetching: memberFetching } = useGetMemberQuery(
+    form.memberId,
+    { skip: !form.memberId }
+  )
+  const selectedMember = selectedMemberData?.data || null
+  const assignedPlan = selectedMember?.currentPlanId || null
+
+  // Auto-fill amount from plan price when member (or plan) loads
+  useEffect(() => {
+    if (!form.memberId) return
+    if (assignedPlan?.price != null && !memberFetching) {
+      setForm((f) => ({ ...f, amount: String(assignedPlan.price) }))
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [assignedPlan?._id, memberFetching])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -62,12 +79,45 @@ function RecordPaymentModal({ onClose }) {
             <SearchableSelect
               options={memberOptions}
               value={form.memberId}
-              onChange={(val) => set('memberId', val)}
+              onChange={(val) => {
+                // Reset amount when switching member so plan price re-populates cleanly
+                setForm((f) => ({ ...f, memberId: val, amount: '', paidAmount: '' }))
+              }}
               placeholder="Search member by name or ID..."
               searchPlaceholder="Type member name, ID, or phone..."
               id="payment-member"
             />
           </div>
+
+          {/* Plan info banner */}
+          {form.memberId && memberFetching && (
+            <div style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 0' }}>
+              <Loader size={13} className="spin" /> Fetching member plan info...
+            </div>
+          )}
+          {form.memberId && !memberFetching && (
+            <div style={{
+              padding: '0.75rem 1rem', borderRadius: 8, fontSize: '0.82rem', border: '1px solid',
+              ...(assignedPlan
+                ? { background: 'rgba(99,102,241,0.08)', borderColor: 'rgba(99,102,241,0.3)', color: 'var(--color-text-secondary)' }
+                : { background: 'rgba(245,158,11,0.08)', borderColor: 'rgba(245,158,11,0.3)', color: '#f59e0b' }),
+            }}>
+              {assignedPlan ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                  <span style={{ fontWeight: 700, color: 'var(--color-accent-light)', fontSize: '0.85rem' }}>
+                    📋 Plan: {assignedPlan.name}
+                  </span>
+                  <span>
+                    Duration: {assignedPlan.durationDays} days &nbsp;|&nbsp;
+                    Price: <strong style={{ color: 'var(--color-text-primary)' }}>₹{Number(assignedPlan.price).toLocaleString('en-IN')}</strong>
+                    &nbsp;— auto-filled below
+                  </span>
+                </div>
+              ) : (
+                <span>⚠️ This member has no plan assigned. Enter the amount manually.</span>
+              )}
+            </div>
+          )}
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
             <div className="form-group">
@@ -142,6 +192,16 @@ export default function PaymentsPage() {
   const [methodFilter, setMethodFilter] = useState('')
   const [rangeFilter, setRangeFilter] = useState(rangeParam)
   const [page, setPage] = useState(1)
+
+  // Read memberId from URL — navigated here from Members page Payment button
+  const memberIdParam = searchParams.get('memberId') || ''
+
+  // Auto-open modal when memberId is in the URL
+  useEffect(() => {
+    if (memberIdParam) {
+      setShowModal(true)
+    }
+  }, [memberIdParam])
 
   useEffect(() => {
     setRangeFilter(rangeParam)
@@ -330,7 +390,22 @@ export default function PaymentsPage() {
         )}
       </div>
 
-      {showModal && <RecordPaymentModal onClose={() => setShowModal(false)} />}
+      {showModal && (
+        <RecordPaymentModal
+          initialMemberId={memberIdParam}
+          onClose={() => {
+            setShowModal(false)
+            // Remove memberId param from URL when modal is closed
+            if (memberIdParam) {
+              setSearchParams((prev) => {
+                const next = new URLSearchParams(prev)
+                next.delete('memberId')
+                return next
+              })
+            }
+          }}
+        />
+      )}
     </div>
   )
 }

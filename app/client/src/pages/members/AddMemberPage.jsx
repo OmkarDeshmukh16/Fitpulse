@@ -110,9 +110,9 @@ export default function AddMemberPage() {
       return
     }
     try {
-      const member = await createMember(form).unwrap()
+      await createMember(form).unwrap()
       toast.success(`Member "${form.fullName}" registered successfully!`)
-      navigate(`/members/${member.data._id}`)
+      navigate('/members')
     } catch (err) {
       toast.error(err?.data?.message || 'Failed to create member')
     }

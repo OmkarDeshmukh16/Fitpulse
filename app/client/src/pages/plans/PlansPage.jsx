@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import { motion } from 'framer-motion'
 import { Plus, Edit, Trash2, Loader, Check, X, Dumbbell, Users } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useGetPlansQuery, useCreatePlanMutation, useUpdatePlanMutation, useDeletePlanMutation } from '../../services/api'
 import SearchableSelect from '../../components/common/SearchableSelect'
+import { selectCurrentUser } from '../../redux/slices/authSlice'
 
 const PRESET_COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6']
 
-function PlanCard({ plan, onEdit, onDelete }) {
+function PlanCard({ plan, onEdit }) {
   return (
     <motion.div
       className="card"
@@ -23,8 +25,7 @@ function PlanCard({ plan, onEdit, onDelete }) {
           <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{plan.durationDays} days</p>
         </div>
         <div style={{ display: 'flex', gap: '0.375rem' }}>
-          <button className="btn btn-ghost" style={{ padding: '0.375rem' }} onClick={() => onEdit(plan)}><Edit size={14} /></button>
-          <button className="btn btn-ghost" style={{ padding: '0.375rem', color: 'var(--color-danger)' }} onClick={() => onDelete(plan._id, plan.name)}><Trash2 size={14} /></button>
+          <button className="btn btn-ghost" style={{ padding: '0.375rem' }} onClick={() => onEdit(plan)} title="Edit Plan"><Edit size={14} /></button>
         </div>
       </div>
 
@@ -157,14 +158,6 @@ export default function PlansPage() {
     } catch (err) { toast.error(err?.data?.message || 'Failed') }
   }
 
-  const handleDelete = async (id, name) => {
-    if (!window.confirm(`Delete plan "${name}"?`)) return
-    try {
-      await deletePlan(id).unwrap()
-      toast.success('Plan deleted')
-    } catch (err) { toast.error(err?.data?.message || 'Cannot delete plan with active members') }
-  }
-
   return (
     <div className="fade-in">
       <div className="page-header">
@@ -182,7 +175,7 @@ export default function PlansPage() {
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.25rem' }}>
           {plans.map(plan => (
-            <PlanCard key={plan._id} plan={plan} onEdit={setEditPlan} onDelete={handleDelete} />
+            <PlanCard key={plan._id} plan={plan} onEdit={setEditPlan} />
           ))}
           {plans.length === 0 && (
             <div className="card" style={{ textAlign: 'center', padding: '3rem', color: 'var(--color-text-muted)', gridColumn: '1 / -1' }}>
