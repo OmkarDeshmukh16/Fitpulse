@@ -1,10 +1,55 @@
 const mongoose = require('mongoose');
 const Attendance = require('../models/Attendance.model');
 const Member = require('../models/Member.model');
+const { Membership } = require('../models/MembershipPlan.model');
 
 const getGymId = (req) => req.user.gymId;
 
 const getTodayString = () => new Date().toISOString().split('T')[0];
+
+// Helper: verify if member is eligible for attendance (not inactive and not expired)
+async function checkMemberAttendanceEligibility(member) {
+  if (member.membershipStatus === 'inactive') {
+    return {
+      eligible: false,
+      message: "Attendance cannot be recorded. This member's membership is inactive.",
+    };
+  }
+
+  if (member.membershipStatus === 'expired') {
+    return {
+      eligible: false,
+      message: "Attendance cannot be recorded. This member's membership has expired.",
+    };
+  }
+
+  // Detect membership that has actually expired based on Membership record / endDate
+  const now = new Date();
+  const latestMembership = await Membership.findOne({ memberId: member._id })
+    .sort({ endDate: -1, createdAt: -1 });
+
+  if (latestMembership) {
+    const isExpiredByDate = latestMembership.endDate && new Date(latestMembership.endDate) < now;
+    const isExpiredByStatus = latestMembership.status === 'expired';
+
+    if (isExpiredByDate || isExpiredByStatus) {
+      const hasActiveMembership = await Membership.exists({
+        memberId: member._id,
+        status: 'active',
+        endDate: { $gte: now },
+      });
+
+      if (!hasActiveMembership) {
+        return {
+          eligible: false,
+          message: "Attendance cannot be recorded. This member's membership has expired.",
+        };
+      }
+    }
+  }
+
+  return { eligible: true };
+}
 
 // Helper: flexibly find member by Mongo _id, custom memberId, phone, or email
 async function findMemberByIdentifier(gymId, identifier) {
@@ -70,6 +115,24 @@ exports.checkIn = async (req, res) => {
     return res.status(404).json({
       success: false,
       message: `Member not found with ID "${memberId}". Please check Member ID or Phone.`,
+    });
+  }
+
+  // Validate membership eligibility before checking existing check-in or creating Attendance
+  const eligibility = await checkMemberAttendanceEligibility(member);
+  if (!eligibility.eligible) {
+    return res.status(403).json({
+      success: false,
+      message: eligibility.message,
+      member: {
+        _id: member._id,
+        fullName: member.fullName,
+        memberId: member.memberId,
+        photo: member.photo,
+        phone: member.phone,
+        membershipStatus: member.membershipStatus === 'active' ? 'expired' : member.membershipStatus,
+        planName: member.currentPlanId?.name || null,
+      },
     });
   }
 
@@ -209,6 +272,26 @@ exports.checkInByQR = async (req, res) => {
       success: false,
       message: `No gym member found matching QR Code ("${candidateId.slice(0, 30)}")`,
     });
+  }
+
+  // Validate membership eligibility before Attendance.findOne / Attendance.create()
+  if (mode !== 'checkout') {
+    const eligibility = await checkMemberAttendanceEligibility(member);
+    if (!eligibility.eligible) {
+      return res.status(403).json({
+        success: false,
+        message: eligibility.message,
+        member: {
+          _id: member._id,
+          fullName: member.fullName,
+          memberId: member.memberId,
+          photo: member.photo,
+          phone: member.phone,
+          membershipStatus: member.membershipStatus === 'active' ? 'expired' : member.membershipStatus,
+          planName: member.currentPlanId?.name || null,
+        },
+      });
+    }
   }
 
   const today = getTodayString();

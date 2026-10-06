@@ -10,15 +10,54 @@ const Settings = require('../models/Settings.model');
 
 const getGymId = (req) => req.user.gymId;
 
+// Helper: get member IDs whose membership has expired based on Membership records
+async function getExpiredMemberIds(gymId) {
+  const now = new Date();
+  const activeMemberIds = await Membership.distinct('memberId', {
+    gymId,
+    status: { $in: ['active', 'frozen'] },
+    endDate: { $gte: now },
+  });
+
+  const expiredMemberIds = await Membership.distinct('memberId', {
+    gymId,
+    $or: [{ endDate: { $lt: now } }, { status: 'expired' }],
+    memberId: { $nin: activeMemberIds },
+  });
+
+  return expiredMemberIds;
+}
+
 // @route GET /api/members
 exports.getMembers = async (req, res) => {
   const gymId = getGymId(req);
   const { page = 1, limit = 20, search, status, filter, planId } = req.query;
 
   const query = { gymId, isDeleted: false };
+  const andConditions = [];
+
+  const expiredMemberIds = await getExpiredMemberIds(gymId);
+
   if (status) {
     if (status === 'inactive') {
-      query.membershipStatus = { $in: ['inactive', 'expired'] };
+      andConditions.push({
+        $or: [
+          { membershipStatus: { $in: ['inactive', 'expired'] } },
+          { _id: { $in: expiredMemberIds } },
+        ],
+      });
+    } else if (status === 'expired') {
+      andConditions.push({
+        $or: [
+          { membershipStatus: 'expired' },
+          { _id: { $in: expiredMemberIds } },
+        ],
+      });
+    } else if (status === 'active') {
+      query.membershipStatus = 'active';
+      if (expiredMemberIds.length > 0) {
+        query._id = { $nin: expiredMemberIds };
+      }
     } else if (status === 'newThisMonth' || status === 'new') {
       const now = new Date();
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
@@ -38,12 +77,18 @@ exports.getMembers = async (req, res) => {
 
   if (planId) query.currentPlanId = planId;
   if (search) {
-    query.$or = [
-      { fullName: { $regex: search, $options: 'i' } },
-      { phone: { $regex: search, $options: 'i' } },
-      { email: { $regex: search, $options: 'i' } },
-      { memberId: { $regex: search, $options: 'i' } },
-    ];
+    andConditions.push({
+      $or: [
+        { fullName: { $regex: search, $options: 'i' } },
+        { phone: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+        { memberId: { $regex: search, $options: 'i' } },
+      ],
+    });
+  }
+
+  if (andConditions.length > 0) {
+    query.$and = andConditions;
   }
 
   const total = await Member.countDocuments(query);
@@ -54,9 +99,18 @@ exports.getMembers = async (req, res) => {
     .skip((page - 1) * limit)
     .limit(Number(limit));
 
+  const expiredSet = new Set(expiredMemberIds.map((id) => id.toString()));
+  const formattedMembers = members.map((m) => {
+    const obj = m.toObject();
+    if (expiredSet.has(obj._id.toString())) {
+      obj.membershipStatus = 'expired';
+    }
+    return obj;
+  });
+
   res.json({
     success: true,
-    data: members,
+    data: formattedMembers,
     pagination: { total, page: Number(page), limit: Number(limit), pages: Math.ceil(total / limit) },
   });
 };
@@ -79,7 +133,20 @@ exports.getMember = async (req, res) => {
   const activeMembership = await Membership.findOne({ memberId: member._id, status: 'active' })
     .populate('planId');
 
-  res.json({ success: true, data: { ...member.toObject(), activeMembership } });
+  const memberObj = member.toObject();
+  if (memberObj.membershipStatus === 'active') {
+    const now = new Date();
+    if (activeMembership && activeMembership.endDate && new Date(activeMembership.endDate) < now) {
+      memberObj.membershipStatus = 'expired';
+    } else if (!activeMembership) {
+      const latest = await Membership.findOne({ memberId: member._id }).sort({ endDate: -1 });
+      if (latest && latest.endDate && new Date(latest.endDate) < now) {
+        memberObj.membershipStatus = 'expired';
+      }
+    }
+  }
+
+  res.json({ success: true, data: { ...memberObj, activeMembership } });
 };
 
 // @route POST /api/members
