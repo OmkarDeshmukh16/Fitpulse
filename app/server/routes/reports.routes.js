@@ -9,6 +9,7 @@ router.get('/revenue', ...mgr, ctrl.getRevenueReport);
 router.get('/attendance', ...mgr, ctrl.getAttendanceReport);
 router.get('/expiry', ...mgr, ctrl.getExpiryReport);
 router.get('/lost-members', ...mgr, ctrl.getLostMembers);
+router.post('/lost-members/campaign', ...mgr, ctrl.sendLostMembersCampaign);
 router.get('/export/payments', ...mgr, ctrl.exportPayments);
 
 module.exports = router;

@@ -68,16 +68,18 @@ const generateReceipt = (res, { payment, member, gym }) => {
   // Payment info
   doc.fillColor('#111').fontSize(11).font('Helvetica-Bold').text('Payment Details', 40, 280);
 
+  const sym = 'Rs. ';
+
   const items = [
-    ['Amount', `${gym.currencySymbol || '₹'}${payment.amount.toFixed(2)}`],
-    ['Paid', `${gym.currencySymbol || '₹'}${payment.paidAmount.toFixed(2)}`],
-    ['Due', `${gym.currencySymbol || '₹'}${(payment.dueAmount || 0).toFixed(2)}`],
-    ['Method', payment.method.toUpperCase()],
-    ['Status', payment.status.toUpperCase()],
+    ['Amount', `${sym}${Number(payment.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`],
+    ['Paid', `${sym}${Number(payment.paidAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`],
+    ['Due', `${sym}${Number(payment.dueAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`],
+    ['Method', (payment.method || '').toUpperCase()],
+    ['Status', (payment.status || '').toUpperCase()],
   ];
 
   if (payment.gstAmount > 0) {
-    items.splice(2, 0, ['GST', `${gym.currencySymbol || '₹'}${payment.gstAmount.toFixed(2)}`]);
+    items.splice(2, 0, ['GST', `${sym}${Number(payment.gstAmount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`]);
   }
 
   let y = 298;

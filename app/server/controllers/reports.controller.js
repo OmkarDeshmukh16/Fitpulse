@@ -2,6 +2,9 @@ const Payment = require('../models/Payment.model');
 const Member = require('../models/Member.model');
 const Attendance = require('../models/Attendance.model');
 const { Membership } = require('../models/MembershipPlan.model');
+const Settings = require('../models/Settings.model');
+const ActivityLog = require('../models/ActivityLog.model');
+const sendEmail = require('../services/email.service');
 const ExcelJS = require('exceljs');
 const { Parser } = require('json2csv');
 
@@ -96,6 +99,75 @@ exports.getLostMembers = async (req, res) => {
     .sort({ updatedAt: -1 });
 
   res.json({ success: true, data: members, count: members.length });
+};
+
+// POST /api/reports/lost-members/campaign
+exports.sendLostMembersCampaign = async (req, res) => {
+  const gymId = getGymId(req);
+  const { memberIds, offerTitle, message, sendEmailToAvailable } = req.body;
+
+  if (!memberIds || !Array.isArray(memberIds) || memberIds.length === 0) {
+    return res.status(400).json({ success: false, message: 'No members selected' });
+  }
+
+  const query = { gymId, _id: { $in: memberIds }, isDeleted: false };
+  const members = await Member.find(query).populate('currentPlanId', 'name');
+  const gymSettings = await Settings.findById(gymId);
+  const gymName = gymSettings?.gymName || 'Fitpulse';
+
+  let emailedCount = 0;
+  if (sendEmailToAvailable) {
+    for (const member of members) {
+      if (member.email) {
+        try {
+          const personalizedMsg = (message || '')
+            .replace(/\{name\}/gi, member.fullName)
+            .replace(/\{gymName\}/gi, gymName)
+            .replace(/\{planName\}/gi, member.currentPlanId?.name || 'Membership');
+
+          await sendEmail({
+            to: member.email,
+            subject: offerTitle || `Special Exclusive Offer from ${gymName}!`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 12px; background: #ffffff;">
+                <h2 style="color: #6366f1; margin-bottom: 16px; font-size: 20px;">${offerTitle || 'Special Offer for You!'}</h2>
+                <div style="font-size: 15px; line-height: 1.6; color: #334155; white-space: pre-line; background: #f8fafc; padding: 16px; border-radius: 8px; border-left: 4px solid #6366f1;">${personalizedMsg}</div>
+                <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-size: 13px; color: #64748b;">
+                  <p style="margin: 0 0 4px 0;">Warm regards,</p>
+                  <p style="margin: 0; font-weight: bold; color: #1e293b;">${gymName} Team</p>
+                  ${gymSettings?.phone ? `<p style="margin: 4px 0 0 0;">📞 Contact: ${gymSettings.phone}</p>` : ''}
+                </div>
+              </div>
+            `,
+          });
+          emailedCount++;
+        } catch (err) {
+          console.error(`Failed to send email to ${member.email}:`, err.message);
+        }
+      }
+    }
+  }
+
+  // Log activity
+  try {
+    await ActivityLog.create({
+      gymId,
+      userId: req.user._id,
+      action: 'campaign.lost_members',
+      entity: 'member',
+      description: `Sent re-engagement campaign "${offerTitle || 'Exclusive Offer'}" to ${members.length} inactive members.`,
+      metadata: { count: members.length, offerTitle, emailedCount },
+    });
+  } catch (err) {
+    console.error('Activity log error:', err.message);
+  }
+
+  res.json({
+    success: true,
+    message: `Campaign initiated for ${members.length} members.`,
+    count: members.length,
+    emailedCount,
+  });
 };
 
 // GET /api/reports/export/payments?format=csv|excel

@@ -1,6 +1,18 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { BarChart2, CalendarRange, Download, TrendingDown } from 'lucide-react'
+import {
+  BarChart2,
+  CalendarRange,
+  Download,
+  TrendingDown,
+  MessageCircle,
+  MessageSquare,
+  Sparkles,
+  CheckSquare,
+  Square,
+  Send,
+  Users,
+} from 'lucide-react'
 import { format } from 'date-fns'
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -8,6 +20,7 @@ import {
 import { apiSlice } from '../../services/apiSlice'
 import { useSelector } from 'react-redux'
 import { selectGymSettings } from '../../redux/slices/authSlice'
+import LostMembersOfferModal, { cleanPhoneNumber, formatMessage } from './LostMembersOfferModal'
 
 import toast from 'react-hot-toast'
 
@@ -18,12 +31,22 @@ const chartStyle = {
 const tabs = ['Revenue', 'Attendance', 'Expiry', 'Lost Members']
 
 // Quick API hooks using RTK Query directly
-const { useGetRevenueReportQuery, useGetAttendanceReportQuery, useGetExpiryReportQuery, useGetLostMembersQuery } = apiSlice.injectEndpoints({
+const {
+  useGetRevenueReportQuery,
+  useGetAttendanceReportQuery,
+  useGetExpiryReportQuery,
+  useGetLostMembersQuery,
+  useSendLostMembersCampaignMutation,
+} = apiSlice.injectEndpoints({
   endpoints: (b) => ({
     getRevenueReport: b.query({ query: (p) => ({ url: '/reports/revenue', params: p }) }),
     getAttendanceReport: b.query({ query: (p) => ({ url: '/reports/attendance', params: p }) }),
     getExpiryReport: b.query({ query: (p) => ({ url: '/reports/expiry', params: p }) }),
-    getLostMembers: b.query({ query: () => '/reports/lost-members' }),
+    getLostMembers: b.query({ query: () => '/reports/lost-members', providesTags: ['Reports'] }),
+    sendLostMembersCampaign: b.mutation({
+      query: (body) => ({ url: '/reports/lost-members/campaign', method: 'POST', body }),
+      invalidatesTags: ['Reports', 'Activity'],
+    }),
   }),
 })
 
@@ -34,6 +57,10 @@ export default function ReportsPage() {
   const today = format(new Date(), 'yyyy-MM-dd')
   const monthStart = format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd')
   const [dateRange, setDateRange] = useState({ startDate: monthStart, endDate: today })
+
+  const [selectedLostMemberIds, setSelectedLostMemberIds] = useState([])
+  const [isOfferModalOpen, setIsOfferModalOpen] = useState(false)
+  const [sendCampaignMutation, { isLoading: isSendingCampaign }] = useSendLostMembersCampaignMutation()
 
   const { data: revenueData } = useGetRevenueReportQuery(dateRange, { skip: activeTab !== 'Revenue' })
   const { data: attendanceData } = useGetAttendanceReportQuery(dateRange, { skip: activeTab !== 'Attendance' })
@@ -188,7 +215,7 @@ export default function ReportsPage() {
                       </td>
                       <td>{r.planId?.name}</td>
                       <td>{format(new Date(r.endDate), 'dd MMM yyyy')}</td>
-                      <td><span className={`badge ${daysLeft <= 3 ? 'badge-inactive' : 'badge-pending'}`}>{daysLeft}d</span></td>
+                      <td><span className={`badge ${daysLeft <= 3 ? 'badge-inactive' : 'badge-pending'}`}>{daysLeft}</span></td>
                     </tr>
                   )
                 })}
@@ -200,33 +227,232 @@ export default function ReportsPage() {
       )}
 
       {/* Lost Members Tab */}
-      {activeTab === 'Lost Members' && (
-        <div className="card" style={{ padding: 0 }}>
-          <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid var(--color-bg-border)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <TrendingDown size={16} color="var(--color-danger)" />
-            <h3 style={{ fontWeight: 700, fontSize: '0.95rem' }}>Inactive / Lapsed Members — {lostData?.count || 0}</h3>
-          </div>
-          <div className="table-container">
-            <table>
-              <thead><tr><th>Member</th><th>Phone</th><th>Last Plan</th><th>Status</th></tr></thead>
-              <tbody>
-                {(lostData?.data || []).map(m => (
-                  <tr key={m._id}>
-                    <td>
-                      <div style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>{m.fullName}</div>
-                      <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{m.memberId}</div>
-                    </td>
-                    <td>{m.phone}</td>
-                    <td>{m.currentPlanId?.name || '—'}</td>
-                    <td><span className={`badge badge-${m.membershipStatus}`}>{m.membershipStatus}</span></td>
+      {activeTab === 'Lost Members' && (() => {
+        const lostMembersList = lostData?.data || []
+        const isAllSelected = lostMembersList.length > 0 && selectedLostMemberIds.length === lostMembersList.length
+        const isSomeSelected = selectedLostMemberIds.length > 0 && selectedLostMemberIds.length < lostMembersList.length
+
+        const toggleSelectAll = () => {
+          if (isAllSelected) {
+            setSelectedLostMemberIds([])
+          } else {
+            setSelectedLostMemberIds(lostMembersList.map(m => m._id))
+          }
+        }
+
+        const toggleSelectMember = (id) => {
+          setSelectedLostMemberIds(prev =>
+            prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+          )
+        }
+
+        const handleOpenOfferModal = (singleMember = null) => {
+          if (singleMember) {
+            setSelectedLostMemberIds([singleMember._id])
+          } else if (selectedLostMemberIds.length === 0) {
+            setSelectedLostMemberIds(lostMembersList.map(m => m._id))
+          }
+          setIsOfferModalOpen(true)
+        }
+
+        const handleQuickWhatsApp = (member) => {
+          const phone = cleanPhoneNumber(member.phone)
+          if (!phone) {
+            toast.error(`No valid phone number for ${member.fullName}`)
+            return
+          }
+          const defaultMsg = `Hey ${member.fullName}! 💪 We miss you at ${gymSettings?.gymName || 'Fitpulse'}! Renew your membership this week and get an exclusive 20% discount. Visit us or reply to claim your offer! 🔥`
+          window.open(`https://wa.me/${phone}?text=${encodeURIComponent(defaultMsg)}`, '_blank')
+        }
+
+        const handleQuickSMS = (member) => {
+          const defaultMsg = `Hey ${member.fullName}! 💪 We miss you at ${gymSettings?.gymName || 'Fitpulse'}! Renew your membership this week and get an exclusive 20% discount. Visit us or reply to claim your offer! 🔥`
+          window.open(`sms:${member.phone}?body=${encodeURIComponent(defaultMsg)}`, '_self')
+        }
+
+        const targetMembers = lostMembersList.filter(m =>
+          selectedLostMemberIds.length > 0 ? selectedLostMemberIds.includes(m._id) : true
+        )
+
+        return (
+          <div className="card" style={{ padding: 0 }}>
+            <div
+              style={{
+                padding: '1rem 1.25rem',
+                borderBottom: '1px solid var(--color-bg-border)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '0.75rem',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <TrendingDown size={18} color="var(--color-danger)" />
+                <h3 style={{ fontWeight: 700, fontSize: '0.95rem', margin: 0 }}>
+                  Inactive / Lapsed Members — {lostData?.count || 0}
+                </h3>
+              </div>
+
+              {lostMembersList.length > 0 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  {selectedLostMemberIds.length > 0 && (
+                    <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
+                      <strong>{selectedLostMemberIds.length}</strong> of {lostMembersList.length} selected
+                    </span>
+                  )}
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => handleOpenOfferModal()}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.45rem',
+                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                      borderColor: '#059669',
+                      padding: '0.5rem 0.9rem',
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      boxShadow: '0 2px 8px rgba(16, 185, 129, 0.25)',
+                    }}
+                    id="send-bulk-offer-btn"
+                  >
+                    <MessageCircle size={16} />
+                    <span>
+                      {selectedLostMemberIds.length > 0
+                        ? `Send Offer to Selected (${selectedLostMemberIds.length})`
+                        : 'Send Bulk Offer / WhatsApp to All'}
+                    </span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    {lostMembersList.length > 0 && (
+                      <th style={{ width: '40px', textAlign: 'center' }}>
+                        <input
+                          type="checkbox"
+                          checked={isAllSelected}
+                          ref={el => { if (el) el.indeterminate = isSomeSelected }}
+                          onChange={toggleSelectAll}
+                          style={{ cursor: 'pointer', width: 16, height: 16 }}
+                          title="Select all members"
+                        />
+                      </th>
+                    )}
+                    <th>Member</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Last Plan</th>
+                    <th>Status</th>
+                    <th style={{ textAlign: 'right' }}>Quick Actions</th>
                   </tr>
-                ))}
-                {!lostData?.data?.length && <tr><td colSpan={4} style={{ textAlign: 'center', padding: '2rem', color: 'var(--color-text-muted)' }}>No lapsed members. Great retention! 🎉</td></tr>}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {lostMembersList.map(m => {
+                    const isSelected = selectedLostMemberIds.includes(m._id)
+                    return (
+                      <tr
+                        key={m._id}
+                        style={{
+                          background: isSelected ? 'rgba(99, 102, 241, 0.05)' : 'transparent',
+                        }}
+                      >
+                        <td style={{ textAlign: 'center' }}>
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => toggleSelectMember(m._id)}
+                            style={{ cursor: 'pointer', width: 16, height: 16 }}
+                          />
+                        </td>
+                        <td>
+                          <div style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>{m.fullName}</div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{m.memberId}</div>
+                        </td>
+                        <td>{m.phone}</td>
+                        <td style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>{m.email || '—'}</td>
+                        <td>{m.currentPlanId?.name || '—'}</td>
+                        <td><span className={`badge badge-${m.membershipStatus}`}>{m.membershipStatus}</span></td>
+                        <td style={{ textAlign: 'right' }}>
+                          <div style={{ display: 'inline-flex', gap: '0.4rem', justifyContent: 'flex-end' }}>
+                            <button
+                              type="button"
+                              className="btn btn-ghost"
+                              onClick={() => handleQuickWhatsApp(m)}
+                              style={{
+                                padding: '0.35rem 0.55rem',
+                                color: '#10b981',
+                                background: 'rgba(16, 185, 129, 0.1)',
+                                border: '1px solid rgba(16, 185, 129, 0.2)',
+                                borderRadius: 6,
+                              }}
+                              title="Send WhatsApp Offer"
+                            >
+                              <MessageCircle size={14} />
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-ghost"
+                              onClick={() => handleQuickSMS(m)}
+                              style={{
+                                padding: '0.35rem 0.55rem',
+                                color: '#3b82f6',
+                                background: 'rgba(59, 130, 246, 0.1)',
+                                border: '1px solid rgba(59, 130, 246, 0.2)',
+                                borderRadius: 6,
+                              }}
+                              title="Send SMS"
+                            >
+                              <MessageSquare size={14} />
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-secondary"
+                              onClick={() => handleOpenOfferModal(m)}
+                              style={{
+                                padding: '0.35rem 0.65rem',
+                                fontSize: '0.75rem',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.3rem',
+                              }}
+                              title="Customize & Send Offer"
+                            >
+                              <Sparkles size={12} color="#f59e0b" /> Offer
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                  {!lostMembersList.length && (
+                    <tr>
+                      <td colSpan={7} style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--color-text-muted)' }}>
+                        No lapsed members. Great retention! 🎉
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Offer Modal */}
+            <LostMembersOfferModal
+              isOpen={isOfferModalOpen}
+              onClose={() => setIsOfferModalOpen(false)}
+              selectedMembers={targetMembers}
+              gymSettings={gymSettings}
+              onSendEmailCampaign={sendCampaignMutation}
+              isSendingCampaign={isSendingCampaign}
+            />
           </div>
-        </div>
-      )}
+        )
+      })()}
     </div>
   )
 }
