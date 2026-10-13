@@ -169,7 +169,7 @@ export default function BookDemoModal({ isOpen, onClose }) {
                       Transform Your Gym into a Next-Gen Empire.
                     </h2>
                     <p className="text-gray-400 text-xs sm:text-sm leading-relaxed mb-8">
-                      Experience how Fitpulse automates memberships, biometric access control, payment collection, and revenue analytics in one sleek platform.
+                      Experience how Fitpulse automates memberships, QR attendance tracking, payment collection, and revenue analytics in one sleek platform.
                     </p>
 
                     {/* Features list */}
@@ -179,8 +179,8 @@ export default function BookDemoModal({ isOpen, onClose }) {
                           <Zap size={13} />
                         </div>
                         <div>
-                          <strong className="text-white block">15-Minute Live Walkthrough</strong>
-                          Customized specifically to your gym size and branch requirements.
+                          <strong className="text-white block">Live Platform Walkthrough</strong>
+                          Explore member profiles, billing, and workout planners tailored for your gym.
                         </div>
                       </div>
 
@@ -189,8 +189,8 @@ export default function BookDemoModal({ isOpen, onClose }) {
                           <ShieldCheck size={13} />
                         </div>
                         <div>
-                          <strong className="text-white block">Hardware & Gate Sync Demo</strong>
-                          See biometric scanners and auto-turnstile access in action.
+                          <strong className="text-white block">QR Check-in & Attendance Demo</strong>
+                          See instant QR code scanning and real-time attendance tracking in action.
                         </div>
                       </div>
 
@@ -200,24 +200,19 @@ export default function BookDemoModal({ isOpen, onClose }) {
                         </div>
                         <div>
                           <strong className="text-white block">Tailored Pricing Strategy</strong>
-                          Get a custom plan matching your active member count.
+                          Get a plan matching your facility requirements and estimated member count.
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Social Proof Footer Card */}
+                  {/* Product Highlight Footer Card */}
                   <div className="relative z-10 p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md">
-                    <div className="flex items-center gap-1.5 text-amber-400 mb-1.5">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} size={14} fill="currentColor" />
-                      ))}
-                    </div>
                     <p className="text-xs text-gray-300 leading-snug">
-                      "Fitpulse helped us double our renewal rate in 90 days. Onboarding took less than a day."
+                      "Centralize member profiles, contactless QR check-ins, fee collections, and personalized workout and diet plans in one unified system."
                     </p>
                     <span className="text-[11px] text-purple-400 font-semibold block mt-2">
-                      — Premium Fitness Club Chain
+                      — Fitpulse Management Platform
                     </span>
                   </div>
                 </div>
@@ -371,7 +366,7 @@ export default function BookDemoModal({ isOpen, onClose }) {
                           rows={2}
                           value={form.notes}
                           onChange={e => set('notes', e.target.value)}
-                          placeholder="Tell us about multi-branch setups, biometric hardware, or custom needs..."
+                          placeholder="Tell us about your facility, member capacity, or specific setup needs..."
                           className="w-full p-3.5 rounded-2xl bg-white/5 border border-white/10 focus:border-purple-500 focus:bg-white/[0.07] focus:ring-2 focus:ring-purple-500/30 focus:outline-none text-sm text-white placeholder-gray-500 transition-all resize-none"
                         />
                       </div>

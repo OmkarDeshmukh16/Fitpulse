@@ -2,8 +2,6 @@ import { motion } from 'framer-motion'
 import MagneticButton from '../components/ui/MagneticButton'
 import FloatingStatCards from '../components/ui/FloatingStatCards'
 
-const avatarColors = ['#7C3AED', '#5B21B6', '#8B5CF6', '#6D28D9']
-
 export default function HeroSection({ onOpenDemo }) {
   return (
     <section
@@ -33,7 +31,7 @@ export default function HeroSection({ onOpenDemo }) {
                 style={{ fontFamily: 'Satoshi, sans-serif' }}
               >
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
-                #1 Gym Management Software
+                All-in-One Gym Management Platform
               </span>
             </motion.div>
 
@@ -81,44 +79,24 @@ export default function HeroSection({ onOpenDemo }) {
               </MagneticButton>
             </motion.div>
 
-            {/* Social proof */}
+            {/* Product capabilities highlight */}
             <motion.div
-              className="flex items-center gap-5 pt-4"
+              className="flex items-center gap-3 pt-3"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1.05, duration: 0.7 }}
             >
-              {/* Avatar stack */}
-              <div className="flex -space-x-3">
-                {avatarColors.map((color, i) => (
-                  <div
-                    key={i}
-                    className="w-10 h-10 rounded-full border-2 border-[#050505] flex items-center justify-center text-xs font-bold text-white shadow-md"
-                    style={{ background: `linear-gradient(135deg, ${color}, ${color}88)`, zIndex: 4 - i }}
-                  >
-                    {['A', 'R', 'S', 'M'][i]}
-                  </div>
-                ))}
-                <div className="w-10 h-10 rounded-full border-2 border-[#050505] flex items-center justify-center text-xs font-bold text-white/60 glass">
-                  +
-                </div>
+              <div className="w-8 h-8 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 shrink-0">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
               </div>
-
-              <div>
-                <div className="flex gap-1 mb-1">
-                  {Array.from({ length: 5 }, (_, i) => (
-                    <svg key={i} className="w-4 h-4 text-amber-400 fill-amber-400" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
-                <span className="text-white/50 text-sm" style={{ fontFamily: 'Satoshi, sans-serif' }}>
-                  Trusted by <span className="text-white font-medium">500+ gyms</span>
-                </span>
-              </div>
+              <span className="text-white/60 text-sm" style={{ fontFamily: 'Satoshi, sans-serif' }}>
+                Engineered for fitness centers, studios, and gym operations
+              </span>
             </motion.div>
 
-            {/* Quick stats row */}
+            {/* Platform pillars row */}
             <motion.div
               className="grid grid-cols-3 gap-6 pt-6 border-t border-white/10 mt-2"
               initial={{ opacity: 0 }}
@@ -126,9 +104,9 @@ export default function HeroSection({ onOpenDemo }) {
               transition={{ delay: 1.2, duration: 0.7 }}
             >
               {[
-                { value: '50K+', label: 'Members managed' },
-                { value: '₹2Cr+', label: 'Revenue processed' },
-                { value: '99.9%', label: 'Uptime SLA' },
+                { value: 'Unified', label: 'Member Management' },
+                { value: 'Instant', label: 'QR Attendance' },
+                { value: 'Integrated', label: 'Billing & Records' },
               ].map((s) => (
                 <div key={s.label}>
                   <div className="text-white font-bold text-lg md:text-xl" style={{ fontFamily: 'Clash Display, sans-serif' }}>{s.value}</div>

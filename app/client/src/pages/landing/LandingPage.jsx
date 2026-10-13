@@ -10,9 +10,9 @@ import WorldScene from './components/Scene/WorldScene'
 import HeroSection from './sections/HeroSection'
 import FeaturesSection from './sections/FeaturesSection'
 import DashboardSection from './sections/DashboardSection'
-import StatsSection from './sections/StatsSection'
 import TestimonialsSection from './sections/TestimonialsSection'
 import PricingSection from './sections/PricingSection'
+import AboutSection from './sections/AboutSection'
 import CTASection from './sections/CTASection'
 import Footer from './sections/Footer'
 
@@ -68,9 +68,9 @@ export default function LandingPage() {
                         <div style={{ background: 'linear-gradient(to bottom, transparent 0%, rgba(5,5,5,0.97) 8%, rgba(5,5,5,0.97) 100%)' }}>
                             <FeaturesSection />
                             <DashboardSection />
-                            <StatsSection />
                             <TestimonialsSection />
                             <PricingSection />
+                            <AboutSection />
                             <CTASection />
                             <Footer onOpenDemo={handleOpenDemo} />
                         </div>

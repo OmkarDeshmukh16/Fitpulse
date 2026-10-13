@@ -26,7 +26,7 @@ const plans = [
     desc: 'Everything a growing gym needs to scale operations.',
     features: [
       'Unlimited members',
-      'QR + RFID attendance',
+      'QR & manual attendance',
       'Advanced payments & dues',
       'Workout & diet plans',
       'Analytics & reports',
@@ -47,7 +47,7 @@ const plans = [
       'All Pro features',
       'Custom API integrations',
       'Dedicated account manager',
-      '99.9% SLA guarantee',
+      'Dedicated onboarding & support',
       'On-site onboarding',
       'White-label mobile app',
       'API access & webhooks',

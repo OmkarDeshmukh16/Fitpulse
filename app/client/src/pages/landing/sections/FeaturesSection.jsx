@@ -11,7 +11,7 @@ const features = [
     title: 'Member Management',
     desc: 'Add, manage, and track members with full profile history, documents, and renewal alerts.',
     size: 'large',
-    stat: '1,250 Members',
+    stat: 'Member Profiles',
   },
   {
     icon: (
@@ -20,9 +20,9 @@ const features = [
       </svg>
     ),
     title: 'Attendance Tracking',
-    desc: 'QR code, manual, and RFID attendance with real-time dashboards.',
+    desc: 'QR code and manual attendance with real-time tracking.',
     size: 'medium',
-    stat: '236 Today',
+    stat: 'QR Attendance',
   },
   {
     icon: (
@@ -33,7 +33,7 @@ const features = [
     title: 'Payments & Billing',
     desc: 'Collect dues, send receipts, track overdue, and automate reminders.',
     size: 'medium',
-    stat: '₹1.48L / mo',
+    stat: 'Payment Management',
   },
   {
     icon: (
@@ -44,7 +44,7 @@ const features = [
     title: 'Workout Plans',
     desc: 'Build and assign custom workout programs to members with progress tracking.',
     size: 'large',
-    stat: '320 Plans',
+    stat: 'Workout Planning',
   },
   {
     icon: (
@@ -55,7 +55,7 @@ const features = [
     title: 'Reports & Analytics',
     desc: 'Revenue charts, attendance heatmaps, member growth — all in one view.',
     size: 'medium',
-    stat: '12 Report Types',
+    stat: 'Reports & Analytics',
   },
   {
     icon: (
@@ -66,7 +66,7 @@ const features = [
     title: 'Diet Plans',
     desc: 'Create personalized nutrition plans, track calorie goals, and sync with workouts.',
     size: 'medium',
-    stat: '180 Active Plans',
+    stat: 'Diet & Nutrition',
   },
 ]
 

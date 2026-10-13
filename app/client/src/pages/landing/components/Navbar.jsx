@@ -8,6 +8,7 @@ const links = [
   { name: 'Dashboard', id: 'dashboard' },
   { name: 'Pricing', id: 'pricing' },
   { name: 'Testimonials', id: 'testimonials' },
+  { name: 'About Us', id: 'about' },
 ]
 
 export default function Navbar({ onOpenDemo }) {

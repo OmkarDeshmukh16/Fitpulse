@@ -1,7 +1,52 @@
 const DemoRequest = require('../models/DemoRequest.model');
+const FreeTrialLead = require('../models/FreeTrialLead.model');
 const Settings = require('../models/Settings.model');
 const User = require('../models/User.model');
 const emailService = require('../services/email.service');
+
+// Public: POST /api/demo-requests/free-trial
+exports.createFreeTrialLead = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email || typeof email !== 'string') {
+      return res.status(400).json({ success: false, message: 'Email is required' });
+    }
+
+    const trimmedEmail = email.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      return res.status(400).json({ success: false, message: 'Please enter a valid email address' });
+    }
+
+    const lead = await FreeTrialLead.create({
+      email: trimmedEmail,
+      source: 'landing_cta',
+    });
+
+    try {
+      await emailService.sendEmail({
+        to: process.env.EMAIL_USER || trimmedEmail,
+        subject: `⚡ New Free Trial Lead: ${trimmedEmail}`,
+        html: `<h3>New Free Trial Lead</h3>
+               <p>A new visitor requested a free trial on the Fitpulse landing page.</p>
+               <p><strong>Email:</strong> ${trimmedEmail}</p>
+               <p><strong>Date:</strong> ${new Date().toLocaleString()}</p>`,
+      });
+    } catch (e) {
+      console.log('Free trial notification email skipped or failed:', e.message);
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: 'Thank you! Your free trial request has been submitted. Our team will reach out with your activation link shortly.',
+      data: lead,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 
 // Public: POST /api/demo-requests
 exports.createDemoRequest = async (req, res) => {

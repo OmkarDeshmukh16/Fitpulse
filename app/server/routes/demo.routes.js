@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {
   createDemoRequest,
+  createFreeTrialLead,
   getDemoRequests,
   updateDemoRequest,
   sendPaymentLink,
@@ -9,6 +10,9 @@ const {
   seedSuperAdmin,
 } = require('../controllers/demo.controller');
 const { authenticate, authorize } = require('../middleware/authenticate');
+
+// Public route: Submit free trial lead from landing page CTA
+router.post('/free-trial', createFreeTrialLead);
 
 // Public route: Submit demo request from landing page
 router.post('/', createDemoRequest);
