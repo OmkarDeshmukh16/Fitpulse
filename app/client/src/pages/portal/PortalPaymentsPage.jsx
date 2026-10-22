@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { CreditCard, Download, FileText, Loader } from 'lucide-react'
+import { CreditCard, Download, FileText, AlertCircle, Loader } from 'lucide-react'
 import { useSelector } from 'react-redux'
 import toast from 'react-hot-toast'
 import { useGetPortalPaymentsQuery } from '../../services/portal.api'
@@ -23,7 +23,17 @@ export default function PortalPaymentsPage() {
 
   const payments = data?.data || []
 
-  const totalPaid = payments.filter((p) => p.status === 'paid').reduce((s, p) => s + p.paidAmount, 0)
+  const totalPaid = payments.reduce((sum, p) => {
+    if (p.status === 'refunded' || p.status === 'pending') return sum
+    const amt = Number(p.paidAmount != null ? p.paidAmount : (p.status === 'paid' ? p.amount : 0)) || 0
+    return sum + amt
+  }, 0)
+
+  const totalDue = payments.reduce((sum, p) => {
+    if (p.status === 'refunded' || p.status === 'paid') return sum
+    const due = Number(p.dueAmount || 0)
+    return sum + due
+  }, 0)
 
   const handleDownloadReceipt = async (paymentId, invoiceNumber) => {
     try {
@@ -64,6 +74,16 @@ export default function PortalPaymentsPage() {
           </div>
           <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--color-text-primary)' }}>₹{totalPaid.toLocaleString()}</div>
         </motion.div>
+        {totalDue > 0 && (
+          <motion.div {...fadeUp} transition={{ delay: 0.03 }} className="stat-card">
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #f59e0b, transparent)' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+              <AlertCircle size={16} color="#f59e0b" />
+              <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>Pending Due</span>
+            </div>
+            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#f59e0b' }}>₹{totalDue.toLocaleString()}</div>
+          </motion.div>
+        )}
         <motion.div {...fadeUp} transition={{ delay: 0.05 }} className="stat-card">
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #6366f1, transparent)' }} />
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
