@@ -146,12 +146,40 @@ exports.checkIn = async (req, res) => {
     checkOutTime: null,
   });
 
+  const { mode = 'auto' } = req.body;
+
   if (existing) {
-    const timeStr = existing.checkInTime ? new Date(existing.checkInTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '';
-    return res.status(400).json({
-      success: false,
-      message: `${member.fullName} is already checked in today (${timeStr})`,
-      alreadyCheckedIn: true,
+    if (mode === 'checkin') {
+      const timeStr = existing.checkInTime ? new Date(existing.checkInTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '';
+      return res.status(400).json({
+        success: false,
+        message: `${member.fullName} is already checked in today (${timeStr})`,
+        alreadyCheckedIn: true,
+        data: existing,
+        member: {
+          _id: member._id,
+          fullName: member.fullName,
+          memberId: member.memberId,
+          photo: member.photo,
+          phone: member.phone,
+          membershipStatus: member.membershipStatus,
+          planName: member.currentPlanId?.name || null,
+        },
+      });
+    }
+
+    // 2nd check-in is automatically treated as check-out
+    existing.checkOutTime = new Date();
+    existing.duration = Math.max(
+      1,
+      Math.round((existing.checkOutTime - existing.checkInTime) / (1000 * 60))
+    );
+    await existing.save();
+
+    return res.json({
+      success: true,
+      action: 'checkout',
+      message: `👋 ${member.fullName} checked out (${existing.duration} min workout)`,
       data: existing,
       member: {
         _id: member._id,

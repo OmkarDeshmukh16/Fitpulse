@@ -973,9 +973,9 @@ function KioskScannerModal({ onClose, onScanSuccess }) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// 3. FIXED MANUAL CHECK-IN MODAL (Universal ID / Phone / Autocomplete)
+// 3. FIXED MANUAL CHECK-IN & CHECK-OUT MODAL (Smart Auto Toggle)
 // ─────────────────────────────────────────────────────────────
-function ManualCheckInModal({ onClose, onCheckInSuccess }) {
+function ManualCheckInModal({ onClose, onCheckInSuccess, todayRecords = [] }) {
   const [query, setQuery] = useState('')
   const [selectedMember, setSelectedMember] = useState(null)
   const [checkIn, { isLoading }] = useCheckInMutation()
@@ -989,6 +989,16 @@ function ManualCheckInModal({ onClose, onCheckInSuccess }) {
 
   const membersList = searchResults?.data || []
 
+  // Check if selected member is currently in gym (checked in today with no checkout time)
+  const activeRecord = selectedMember
+    ? todayRecords.find(
+        (r) =>
+          (String(r.memberId?._id) === String(selectedMember._id) ||
+            String(r.memberId?.memberId) === String(selectedMember.memberId)) &&
+          !r.checkOutTime
+      )
+    : null
+
   const handleManualSubmit = async (e) => {
     if (e) e.preventDefault()
     const targetId = selectedMember ? (selectedMember.memberId || selectedMember._id) : query.trim()
@@ -999,13 +1009,18 @@ function ManualCheckInModal({ onClose, onCheckInSuccess }) {
 
     try {
       const res = await checkIn({ memberId: targetId, method: 'manual' }).unwrap()
-      playSound('success')
-      toast.success(res.message || `✅ ${res.member?.fullName || 'Member'} checked in!`)
+      if (res.action === 'checkout') {
+        playSound('checkout')
+        toast.success(res.message || `👋 ${res.member?.fullName || 'Member'} checked out!`)
+      } else {
+        playSound('success')
+        toast.success(res.message || `✅ ${res.member?.fullName || 'Member'} checked in!`)
+      }
       if (onCheckInSuccess) onCheckInSuccess(res)
       onClose()
     } catch (err) {
       playSound('error')
-      toast.error(err?.data?.message || 'Check-in failed. Please verify member ID.')
+      toast.error(err?.data?.message || 'Attendance action failed. Please verify member ID.')
     }
   }
 
@@ -1014,7 +1029,7 @@ function ManualCheckInModal({ onClose, onCheckInSuccess }) {
     try {
       const res = await checkOut({ memberId: targetId }).unwrap()
       playSound('checkout')
-      toast.success(res.message || `Checked out successfully!`)
+      toast.success(res.message || `👋 Checked out successfully!`)
       if (onCheckInSuccess) onCheckInSuccess(res)
       onClose()
     } catch (err) {
@@ -1041,17 +1056,17 @@ function ManualCheckInModal({ onClose, onCheckInSuccess }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{
               width: 38, height: 38, borderRadius: 10,
-              background: 'rgba(99,102,241,0.15)',
+              background: activeRecord ? 'rgba(245, 158, 11, 0.15)' : 'rgba(99,102,241,0.15)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              <UserPlus size={20} color="var(--color-accent)" />
+              {activeRecord ? <LogOut size={20} color="#f59e0b" /> : <UserPlus size={20} color="var(--color-accent)" />}
             </div>
             <div>
               <h2 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--color-text-primary)' }}>
-                Manual Check-In
+                {activeRecord ? 'Manual Check-Out' : 'Manual Check-In'}
               </h2>
               <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-                Search by Member ID (e.g. FP-...), Name, Phone, or Email
+                Search by Member ID, Name, or Phone (auto-detects check-in / check-out)
               </p>
             </div>
           </div>
@@ -1094,35 +1109,50 @@ function ManualCheckInModal({ onClose, onCheckInSuccess }) {
                 borderRadius: 'var(--radius-md)', zIndex: 20, boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
                 maxHeight: 220, overflowY: 'auto',
               }}>
-                {membersList.map((m) => (
-                  <div
-                    key={m._id}
-                    style={{
-                      padding: '0.65rem 0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      borderBottom: '1px solid var(--color-bg-border)', cursor: 'pointer',
-                      transition: 'background 0.15s',
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-bg-hover)'}
-                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                    onClick={() => {
-                      setSelectedMember(m)
-                      setQuery(`${m.fullName} (${m.memberId})`)
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                      <div className="avatar" style={{ width: 30, height: 30, fontSize: '0.75rem' }}>
-                        {m.photo ? <img src={m.photo} alt="" style={{ width: '100%', height: '100%', borderRadius: '50%' }} /> : m.fullName?.charAt(0)}
+                {membersList.map((m) => {
+                  const isAlreadyIn = todayRecords.some(
+                    (r) =>
+                      (String(r.memberId?._id) === String(m._id) ||
+                        String(r.memberId?.memberId) === String(m.memberId)) &&
+                      !r.checkOutTime
+                  )
+                  return (
+                    <div
+                      key={m._id}
+                      style={{
+                        padding: '0.65rem 0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        borderBottom: '1px solid var(--color-bg-border)', cursor: 'pointer',
+                        transition: 'background 0.15s',
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-bg-hover)'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                      onClick={() => {
+                        setSelectedMember(m)
+                        setQuery(`${m.fullName} (${m.memberId})`)
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                        <div className="avatar" style={{ width: 30, height: 30, fontSize: '0.75rem' }}>
+                          {m.photo ? <img src={m.photo} alt="" style={{ width: '100%', height: '100%', borderRadius: '50%' }} /> : m.fullName?.charAt(0)}
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>{m.fullName}</div>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>{m.memberId} • {m.phone}</div>
+                        </div>
                       </div>
-                      <div>
-                        <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>{m.fullName}</div>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)' }}>{m.memberId} • {m.phone}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        {isAlreadyIn && (
+                          <span style={{ fontSize: '0.65rem', padding: '0.15rem 0.5rem', borderRadius: 99, background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', fontWeight: 700 }}>
+                            🟢 In Gym
+                          </span>
+                        )}
+                        <span className={`badge badge-${m.membershipStatus === 'active' ? 'active' : 'inactive'}`} style={{ fontSize: '0.65rem' }}>
+                          {m.membershipStatus}
+                        </span>
                       </div>
                     </div>
-                    <span className={`badge badge-${m.membershipStatus === 'active' ? 'active' : 'inactive'}`} style={{ fontSize: '0.65rem' }}>
-                      {m.membershipStatus}
-                    </span>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             )}
           </div>
@@ -1131,7 +1161,8 @@ function ManualCheckInModal({ onClose, onCheckInSuccess }) {
           {selectedMember && (
             <div style={{
               padding: '0.85rem', borderRadius: 'var(--radius-md)',
-              background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)',
+              background: activeRecord ? 'rgba(245, 158, 11, 0.08)' : 'rgba(99,102,241,0.08)',
+              border: `1px solid ${activeRecord ? 'rgba(245, 158, 11, 0.3)' : 'rgba(99,102,241,0.2)'}`,
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -1140,7 +1171,17 @@ function ManualCheckInModal({ onClose, onCheckInSuccess }) {
                 </div>
                 <div>
                   <div style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-text-primary)' }}>{selectedMember.fullName}</div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>ID: {selectedMember.memberId} • Status: <span style={{ color: selectedMember.membershipStatus === 'active' ? '#10b981' : '#ef4444' }}>{selectedMember.membershipStatus}</span></div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+                    ID: {selectedMember.memberId} • {activeRecord ? (
+                      <span style={{ color: '#f59e0b', fontWeight: 600 }}>
+                        Currently In Gym (Checked In {activeRecord.checkInTime ? new Date(activeRecord.checkInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''})
+                      </span>
+                    ) : (
+                      <span style={{ color: selectedMember.membershipStatus === 'active' ? '#10b981' : '#ef4444' }}>
+                        {selectedMember.membershipStatus}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
               <button
@@ -1162,24 +1203,22 @@ function ManualCheckInModal({ onClose, onCheckInSuccess }) {
             <button type="button" className="btn btn-secondary" onClick={onClose}>
               Cancel
             </button>
-            {selectedMember && (
-              <button
-                type="button"
-                className="btn btn-secondary"
-                style={{ color: 'var(--color-warning)' }}
-                disabled={isCheckingOut}
-                onClick={() => handleManualCheckOut(selectedMember)}
-              >
-                <LogOut size={15} /> {isCheckingOut ? 'Checking out...' : 'Check Out'}
-              </button>
-            )}
             <button
               type="submit"
-              className="btn btn-primary"
-              disabled={isLoading || !query.trim()}
+              className={activeRecord ? 'btn btn-secondary' : 'btn btn-primary'}
+              style={activeRecord ? { background: '#f59e0b', color: '#000', fontWeight: 700, border: 'none' } : {}}
+              disabled={isLoading || isCheckingOut || !query.trim()}
               id="submit-manual-checkin"
             >
-              <LogIn size={15} /> {isLoading ? 'Checking in...' : 'Check In'}
+              {activeRecord ? (
+                <>
+                  <LogOut size={15} /> {isLoading || isCheckingOut ? 'Checking out...' : 'Check Out'}
+                </>
+              ) : (
+                <>
+                  <LogIn size={15} /> {isLoading ? 'Checking in...' : 'Check In'}
+                </>
+              )}
             </button>
           </div>
         </form>
@@ -1476,6 +1515,7 @@ export default function AttendancePage() {
       {/* Manual Check-In Modal */}
       {showManual && (
         <ManualCheckInModal
+          todayRecords={records}
           onClose={() => {
             setShowManual(false)
             refetch()

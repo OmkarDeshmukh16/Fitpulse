@@ -46,10 +46,27 @@ app.use(cors({
 }));
 
 
-// Rate limiting — 100 requests per 15 min per IP
-app.use('/api/', rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
+// Rate limiting — relaxed in development so navigation & HMR don't get throttled
+const isDev = process.env.NODE_ENV !== 'production';
+app.use(
+  '/api/',
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: isDev ? 5000 : 200,
+    standardHeaders: true,
+    legacyHeaders: false,
+  })
+);
 // Stricter limit for auth
-app.use('/api/auth/login', rateLimit({ windowMs: 15 * 60 * 1000, max: 10 }));
+app.use(
+  '/api/auth/login',
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: isDev ? 100 : 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+  })
+);
 
 // Body parsing
 app.use(express.json({ limit: '10mb' }));
