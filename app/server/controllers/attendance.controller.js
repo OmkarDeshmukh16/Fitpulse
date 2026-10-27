@@ -51,19 +51,46 @@ async function checkMemberAttendanceEligibility(member) {
   return { eligible: true };
 }
 
-// Helper: flexibly find member by Mongo _id, custom memberId, phone, or email
+// Helper: flexibly find member by Mongo _id, custom memberId, phone, email, or "Name (MemberID)"
 async function findMemberByIdentifier(gymId, identifier) {
   if (!identifier) return null;
   const trimmed = String(identifier).trim();
 
-  // 1. Try as MongoDB ObjectId
+  // 1. Check if string contains an FP-ID pattern like "FP-1792690604559"
+  const fpMatch = trimmed.match(/FP-[A-Za-z0-9_-]+/i);
+  if (fpMatch) {
+    const member = await Member.findOne({
+      gymId,
+      isDeleted: false,
+      memberId: { $regex: `^${fpMatch[0]}$`, $options: 'i' },
+    }).populate('currentPlanId', 'name price durationDays');
+    if (member) return member;
+  }
+
+  // 2. Check if string contains parentheses like "Name (Identifier)"
+  const parenMatch = trimmed.match(/\(([^)]+)\)/);
+  if (parenMatch) {
+    const inside = parenMatch[1].trim();
+    const insideEscaped = inside.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+    const member = await Member.findOne({
+      gymId,
+      isDeleted: false,
+      $or: [
+        { memberId: { $regex: `^${insideEscaped}$`, $options: 'i' } },
+        { phone: inside },
+      ],
+    }).populate('currentPlanId', 'name price durationDays');
+    if (member) return member;
+  }
+
+  // 3. Try as MongoDB ObjectId
   if (mongoose.Types.ObjectId.isValid(trimmed) && trimmed.length === 24) {
     const member = await Member.findOne({ _id: trimmed, gymId, isDeleted: false })
       .populate('currentPlanId', 'name price durationDays');
     if (member) return member;
   }
 
-  // 2. Try as exact or case-insensitive memberId string (e.g. FP-174023...)
+  // 4. Try as exact or case-insensitive memberId string (e.g. FP-174023...)
   const escaped = trimmed.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
   let member = await Member.findOne({
     gymId,
@@ -72,7 +99,27 @@ async function findMemberByIdentifier(gymId, identifier) {
   }).populate('currentPlanId', 'name price durationDays');
   if (member) return member;
 
-  // 3. Try as phone number
+  // 5. If string had parentheses or dashes, extract the name portion before it
+  const cleanName = trimmed.replace(/\s*[\(\[-].*$/, '').trim();
+  if (cleanName && cleanName !== trimmed) {
+    const cleanEscaped = cleanName.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+    member = await Member.findOne({
+      gymId,
+      isDeleted: false,
+      fullName: { $regex: `^${cleanEscaped}$`, $options: 'i' },
+    }).populate('currentPlanId', 'name price durationDays');
+    if (member) return member;
+  }
+
+  // 6. Try exact full name
+  member = await Member.findOne({
+    gymId,
+    isDeleted: false,
+    fullName: { $regex: `^${escaped}$`, $options: 'i' },
+  }).populate('currentPlanId', 'name price durationDays');
+  if (member) return member;
+
+  // 7. Try as phone number (exact or stripped digits)
   member = await Member.findOne({
     gymId,
     isDeleted: false,
@@ -80,21 +127,33 @@ async function findMemberByIdentifier(gymId, identifier) {
   }).populate('currentPlanId', 'name price durationDays');
   if (member) return member;
 
-  // 4. Try as email
-  member = await Member.findOne({
-    gymId,
-    isDeleted: false,
-    email: trimmed.toLowerCase(),
-  }).populate('currentPlanId', 'name price durationDays');
-  if (member) return member;
+  const digits = trimmed.replace(/\D/g, '');
+  if (digits.length >= 7) {
+    member = await Member.findOne({
+      gymId,
+      isDeleted: false,
+      phone: { $regex: digits.slice(-10) },
+    }).populate('currentPlanId', 'name price durationDays');
+    if (member) return member;
+  }
 
-  // 5. Try partial match on memberId or full name if not found
+  // 8. Try as email
+  if (trimmed.includes('@')) {
+    member = await Member.findOne({
+      gymId,
+      isDeleted: false,
+      email: trimmed.toLowerCase(),
+    }).populate('currentPlanId', 'name price durationDays');
+    if (member) return member;
+  }
+
+  // 9. Partial match on memberId or full name
   member = await Member.findOne({
     gymId,
     isDeleted: false,
     $or: [
       { memberId: { $regex: escaped, $options: 'i' } },
-      { fullName: { $regex: `^${escaped}$`, $options: 'i' } },
+      { fullName: { $regex: cleanName ? cleanName.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&') : escaped, $options: 'i' } },
     ],
   }).populate('currentPlanId', 'name price durationDays');
 

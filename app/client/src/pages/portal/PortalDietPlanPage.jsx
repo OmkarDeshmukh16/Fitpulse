@@ -31,10 +31,10 @@ export default function PortalDietPlanPage() {
   }
 
   // Calculate total macros from meals
-  const totalCals = plan?.meals?.reduce((s, m) => s + m.items.reduce((ss, it) => ss + (it.calories || 0), 0), 0) || 0
-  const totalProtein = plan?.meals?.reduce((s, m) => s + m.items.reduce((ss, it) => ss + (it.protein || 0), 0), 0) || 0
-  const totalCarbs = plan?.meals?.reduce((s, m) => s + m.items.reduce((ss, it) => ss + (it.carbs || 0), 0), 0) || 0
-  const totalFats = plan?.meals?.reduce((s, m) => s + m.items.reduce((ss, it) => ss + (it.fats || 0), 0), 0) || 0
+  const totalCals = plan?.meals?.reduce((s, m) => s + (m.items || []).reduce((ss, it) => ss + (it.calories || 0), 0), 0) || 0
+  const totalProtein = plan?.meals?.reduce((s, m) => s + (m.items || []).reduce((ss, it) => ss + (it.protein || 0), 0), 0) || 0
+  const totalCarbs = plan?.meals?.reduce((s, m) => s + (m.items || []).reduce((ss, it) => ss + (it.carbs || 0), 0), 0) || 0
+  const totalFats = plan?.meals?.reduce((s, m) => s + (m.items || []).reduce((ss, it) => ss + (it.fats || 0), 0), 0) || 0
 
   const macros = plan
     ? [

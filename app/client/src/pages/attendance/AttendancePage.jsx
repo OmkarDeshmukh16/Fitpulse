@@ -1001,10 +1001,23 @@ function ManualCheckInModal({ onClose, onCheckInSuccess, todayRecords = [] }) {
 
   const handleManualSubmit = async (e) => {
     if (e) e.preventDefault()
-    const targetId = selectedMember ? (selectedMember.memberId || selectedMember._id) : query.trim()
+    let targetId = selectedMember ? (selectedMember.memberId || selectedMember._id) : query.trim()
     if (!targetId) {
       toast.error('Please enter a Member ID, Name, or Phone number')
       return
+    }
+
+    // Extract FP-ID or parenthesized ID if user typed or pasted "Name (FP-xxx)"
+    if (typeof targetId === 'string') {
+      const parenMatch = targetId.match(/\(([^)]+)\)/)
+      if (parenMatch && parenMatch[1]) {
+        targetId = parenMatch[1].trim()
+      } else {
+        const fpMatch = targetId.match(/FP-[A-Za-z0-9_-]+/i)
+        if (fpMatch) {
+          targetId = fpMatch[0]
+        }
+      }
     }
 
     try {
@@ -1025,7 +1038,18 @@ function ManualCheckInModal({ onClose, onCheckInSuccess, todayRecords = [] }) {
   }
 
   const handleManualCheckOut = async (memberObj) => {
-    const targetId = memberObj?.memberId || memberObj?._id || query.trim()
+    let targetId = memberObj?.memberId || memberObj?._id || query.trim()
+    if (typeof targetId === 'string') {
+      const parenMatch = targetId.match(/\(([^)]+)\)/)
+      if (parenMatch && parenMatch[1]) {
+        targetId = parenMatch[1].trim()
+      } else {
+        const fpMatch = targetId.match(/FP-[A-Za-z0-9_-]+/i)
+        if (fpMatch) {
+          targetId = fpMatch[0]
+        }
+      }
+    }
     try {
       const res = await checkOut({ memberId: targetId }).unwrap()
       playSound('checkout')
@@ -1126,6 +1150,11 @@ function ManualCheckInModal({ onClose, onCheckInSuccess, todayRecords = [] }) {
                       }}
                       onMouseEnter={(e) => e.currentTarget.style.background = 'var(--color-bg-hover)'}
                       onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                      onMouseDown={(e) => {
+                        e.preventDefault()
+                        setSelectedMember(m)
+                        setQuery(`${m.fullName} (${m.memberId})`)
+                      }}
                       onClick={() => {
                         setSelectedMember(m)
                         setQuery(`${m.fullName} (${m.memberId})`)
