@@ -280,12 +280,12 @@ exports.getPTSessions = async (req, res) => {
     .populate('trainerId', 'name avatar')
     .sort({ date: -1 });
 
-  // Available trainers for booking
+  // Available trainers for booking (dedicated trainers and gym owner)
   const trainers = await User.find({
     gymId: member.gymId,
-    role: 'trainer',
+    role: { $in: ['trainer', 'gymowner'] },
     isActive: true,
-  }).select('name avatar');
+  }).select('name avatar role');
 
   res.json({ success: true, data: sessions, trainers });
 };

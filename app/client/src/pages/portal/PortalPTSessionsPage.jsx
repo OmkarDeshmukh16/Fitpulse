@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { UserCheck, Calendar, Clock, Plus, X, Loader, Dumbbell, Zap, StretchHorizontal } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -29,6 +29,7 @@ const timeSlots = [
 ]
 
 export default function PortalPTSessionsPage() {
+  const dateInputRef = useRef(null)
   const { data, isLoading } = useGetPortalPTSessionsQuery()
   const [bookSession, { isLoading: booking }] = useBookPortalPTSessionMutation()
   const [cancelSession] = useCancelPortalPTSessionMutation()
@@ -108,7 +109,10 @@ export default function PortalPTSessionsPage() {
               <div className="form-group">
                 <label className="label">Trainer *</label>
                 <SearchableSelect
-                  options={trainers.map((t) => ({ value: t._id, label: t.name }))}
+                  options={trainers.map((t) => ({
+                    value: t._id,
+                    label: t.role === 'gymowner' ? `${t.name} (Head Coach)` : t.name,
+                  }))}
                   value={form.trainerId}
                   onChange={(val) => setForm({ ...form, trainerId: val })}
                   placeholder="Select trainer..."
@@ -117,14 +121,58 @@ export default function PortalPTSessionsPage() {
               </div>
               <div className="form-group">
                 <label className="label">Date *</label>
-                <input
-                  className="input"
-                  type="date"
-                  value={form.date}
-                  min={new Date().toISOString().split('T')[0]}
-                  onChange={(e) => setForm({ ...form, date: e.target.value })}
-                  required
-                />
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <input
+                    ref={dateInputRef}
+                    className="input date-picker-custom"
+                    type="date"
+                    value={form.date}
+                    min={new Date().toISOString().split('T')[0]}
+                    onChange={(e) => setForm({ ...form, date: e.target.value })}
+                    required
+                    style={{
+                      paddingRight: '2.5rem',
+                      colorScheme: 'dark',
+                      cursor: 'pointer',
+                    }}
+                    onClick={(e) => {
+                      if (e.target.showPicker) {
+                        try { e.target.showPicker() } catch {}
+                      }
+                    }}
+                  />
+                  <div
+                    onClick={() => {
+                      if (dateInputRef.current?.showPicker) {
+                        try {
+                          dateInputRef.current.showPicker()
+                        } catch {
+                          dateInputRef.current?.focus()
+                        }
+                      } else {
+                        dateInputRef.current?.focus()
+                      }
+                    }}
+                    style={{
+                      position: 'absolute',
+                      right: '0.85rem',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'var(--color-accent, #10b981)',
+                      cursor: 'pointer',
+                      pointerEvents: 'auto',
+                      transition: 'color 0.15s, transform 0.15s',
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.color = '#34d399'}
+                    onMouseLeave={(e) => e.currentTarget.style.color = 'var(--color-accent, #10b981)'}
+                    title="Choose Date"
+                  >
+                    <Calendar size={18} />
+                  </div>
+                </div>
               </div>
               <div className="form-group">
                 <label className="label">Session Type</label>
