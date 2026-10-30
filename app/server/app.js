@@ -46,27 +46,30 @@ app.use(cors({
 }));
 
 
-// Rate limiting — relaxed in development so navigation & HMR don't get throttled
+// Rate limiting — relaxed in development so navigation & HMR don't get throttled; disabled in test mode
 const isDev = process.env.NODE_ENV !== 'production';
-app.use(
-  '/api/',
-  rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: isDev ? 5000 : 200,
-    standardHeaders: true,
-    legacyHeaders: false,
-  })
-);
-// Stricter limit for auth
-app.use(
-  '/api/auth/login',
-  rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: isDev ? 100 : 10,
-    standardHeaders: true,
-    legacyHeaders: false,
-  })
-);
+const isTest = process.env.NODE_ENV === 'test';
+if (!isTest) {
+  app.use(
+    '/api/',
+    rateLimit({
+      windowMs: 15 * 60 * 1000,
+      max: isDev ? 5000 : 200,
+      standardHeaders: true,
+      legacyHeaders: false,
+    })
+  );
+  // Stricter limit for auth
+  app.use(
+    '/api/auth/login',
+    rateLimit({
+      windowMs: 15 * 60 * 1000,
+      max: isDev ? 100 : 10,
+      standardHeaders: true,
+      legacyHeaders: false,
+    })
+  );
+}
 
 // Body parsing
 app.use(express.json({ limit: '10mb' }));
@@ -79,7 +82,31 @@ if (process.env.NODE_ENV !== 'production') {
 
 // Root & Health check
 app.get('/', (req, res) => res.json({ success: true, message: '🚀 Fitpulse Gym Management SaaS API is running successfully' }));
-app.get('/health', (req, res) => res.json({ status: 'ok', service: 'fitpulse-api' }));
+app.get('/health', (req, res) => {
+  const mongoose = require('mongoose');
+  const dbStates = { 0: 'disconnected', 1: 'connected', 2: 'connecting', 3: 'disconnecting' };
+  const dbState = dbStates[mongoose.connection.readyState] || 'unknown';
+  const isHealthy = mongoose.connection.readyState === 1 || process.env.NODE_ENV === 'test';
+
+  const healthData = {
+    status: isHealthy ? 'healthy' : 'degraded',
+    service: 'fitpulse-saas-api',
+    version: '1.0.0',
+    environment: process.env.NODE_ENV || 'development',
+    timestamp: new Date().toISOString(),
+    uptimeSeconds: Math.floor(process.uptime()),
+    database: {
+      status: dbState,
+      connected: mongoose.connection.readyState === 1,
+    },
+    memory: {
+      rssMb: Math.round(process.memoryUsage().rss / 1024 / 1024),
+      heapUsedMb: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+    },
+  };
+
+  res.status(isHealthy ? 200 : 503).json(healthData);
+});
 
 // Auto-prefix /api if omitted in incoming request
 app.use((req, res, next) => {

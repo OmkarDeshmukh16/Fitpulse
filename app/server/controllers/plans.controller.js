@@ -58,21 +58,25 @@ exports.assignPlan = async (req, res) => {
   const { memberId, planId, startDate } = req.body;
   const gymId = getGymId(req);
 
-  const plan = await MembershipPlan.findById(planId);
-  if (!plan) return res.status(404).json({ success: false, message: 'Plan not found' });
+  const [plan, member] = await Promise.all([
+    MembershipPlan.findOne({ _id: planId, gymId }),
+    Member.findOne({ _id: memberId, gymId, isDeleted: false }),
+  ]);
+
+  if (!plan) return res.status(404).json({ success: false, message: 'Plan not found in your gym' });
+  if (!member) return res.status(404).json({ success: false, message: 'Member not found in your gym' });
 
   const start = new Date(startDate || Date.now());
   const end = new Date(start.getTime() + plan.durationDays * 24 * 60 * 60 * 1000);
 
-  // Expire any existing active membership
-  await Membership.updateMany({ memberId, status: 'active' }, { status: 'expired' });
+  // Expire any existing active membership in this gym
+  await Membership.updateMany({ memberId: member._id, gymId, status: 'active' }, { status: 'expired' });
 
-  const membership = await Membership.create({ gymId, memberId, planId, startDate: start, endDate: end });
+  const membership = await Membership.create({ gymId, memberId: member._id, planId: plan._id, startDate: start, endDate: end });
 
-  await Member.findByIdAndUpdate(memberId, {
-    currentPlanId: planId,
-    membershipStatus: 'active',
-  });
+  member.currentPlanId = plan._id;
+  member.membershipStatus = 'active';
+  await member.save();
 
   res.status(201).json({ success: true, data: membership });
 };

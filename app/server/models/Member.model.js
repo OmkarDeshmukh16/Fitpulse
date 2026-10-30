@@ -3,8 +3,8 @@ const { v4: uuidv4 } = require('uuid');
 
 const memberSchema = new mongoose.Schema(
   {
-    gymId: { type: mongoose.Schema.Types.ObjectId, ref: 'Settings', required: true },
-    memberId: { type: String, unique: true, default: () => `FP-${Date.now()}` },
+    gymId: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization', required: true },
+    memberId: { type: String, trim: true, default: () => `FP-${Date.now()}` },
     qrCode: { type: String, default: '' }, // base64 QR image or URL
     photo: { type: String, default: '' },
     fullName: { type: String, required: true, trim: true },
@@ -55,6 +55,7 @@ const memberSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+memberSchema.index({ gymId: 1, memberId: 1 }, { unique: true, sparse: true });
 memberSchema.index({ gymId: 1, membershipStatus: 1 });
 memberSchema.index({ gymId: 1, fullName: 'text', phone: 'text', email: 'text' });
 

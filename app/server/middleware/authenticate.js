@@ -22,7 +22,8 @@ const authenticate = async (req, res, next) => {
       return res.status(401).json({ success: false, message: 'User not found or deactivated' });
     }
 
-    next();
+    const { resolveTenantContext } = require('./tenantContext');
+    return resolveTenantContext(req, res, next);
   } catch (error) {
     return res.status(401).json({ success: false, message: 'Token expired or invalid' });
   }

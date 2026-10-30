@@ -308,9 +308,16 @@ exports.approveAndProvisionGym = async (req, res) => {
   }
 };
 
-// POST /api/demo-requests/seed-superadmin — Ensure Super Admin Account Exists
+// POST /api/demo-requests/seed-superadmin — Ensure Super Admin Account Exists (Dev/Staging Only)
 exports.seedSuperAdmin = async (req, res) => {
   try {
+    if (process.env.NODE_ENV === 'production') {
+      return res.status(403).json({
+        success: false,
+        message: 'Endpoint disabled in production environment',
+      });
+    }
+
     let superadmin = await User.findOne({ email: 'superadmin@fitpulse.com' });
     if (!superadmin) {
       superadmin = await User.create({
@@ -318,6 +325,7 @@ exports.seedSuperAdmin = async (req, res) => {
         email: 'superadmin@fitpulse.com',
         password: 'SuperAdmin@123',
         role: 'superadmin',
+        isEmailVerified: true,
       });
       return res.status(201).json({
         success: true,
@@ -329,7 +337,7 @@ exports.seedSuperAdmin = async (req, res) => {
     res.json({
       success: true,
       message: 'Super Admin already exists',
-      credentials: { email: 'superadmin@fitpulse.com', password: 'SuperAdmin@123' },
+      email: superadmin.email,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

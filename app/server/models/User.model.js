@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema(
   {
     gymId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Settings',
+      ref: 'Organization',
       default: null, // null = super admin
     },
     name: { type: String, required: true, trim: true },
@@ -17,6 +17,11 @@ const userSchema = new mongoose.Schema(
       default: 'receptionist',
     },
     isActive: { type: Boolean, default: true },
+    isEmailVerified: { type: Boolean, default: true },
+    emailVerificationToken: { type: String, default: null },
+    emailVerificationExpire: { type: Date, default: null },
+    mfaEnabled: { type: Boolean, default: false },
+    mfaSecret: { type: String, default: null },
     avatar: { type: String, default: '' },
     refreshToken: { type: String, default: null },
     resetPasswordToken: { type: String, default: null },

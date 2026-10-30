@@ -4,10 +4,10 @@ let invoiceCounter = 1;
 
 const paymentSchema = new mongoose.Schema(
   {
-    gymId: { type: mongoose.Schema.Types.ObjectId, ref: 'Settings', required: true },
+    gymId: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization', required: true },
     memberId: { type: mongoose.Schema.Types.ObjectId, ref: 'Member', required: true },
     membershipId: { type: mongoose.Schema.Types.ObjectId, ref: 'Membership', default: null },
-    invoiceNumber: { type: String, unique: true },
+    invoiceNumber: { type: String, trim: true },
     amount: { type: Number, required: true },
     paidAmount: { type: Number, default: 0 },
     dueAmount: { type: Number, default: 0 },
@@ -38,7 +38,7 @@ const paymentSchema = new mongoose.Schema(
 
 // Auto-generate invoice number (Mongoose 8+ — no next() in async hooks)
 paymentSchema.pre('save', async function () {
-  if (this.isNew) {
+  if (this.isNew && !this.invoiceNumber) {
     const count = await this.constructor.countDocuments({ gymId: this.gymId });
     const year = new Date().getFullYear();
     this.invoiceNumber = `FP-${year}-${String(count + 1).padStart(5, '0')}`;
@@ -46,6 +46,7 @@ paymentSchema.pre('save', async function () {
   }
 });
 
+paymentSchema.index({ gymId: 1, invoiceNumber: 1 }, { unique: true, sparse: true });
 paymentSchema.index({ gymId: 1, date: 1 });
 paymentSchema.index({ gymId: 1, memberId: 1 });
 

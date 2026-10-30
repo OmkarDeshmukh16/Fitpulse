@@ -1,5 +1,7 @@
 const Settings = require('../models/Settings.model');
 const User = require('../models/User.model');
+const Organization = require('../models/Organization.model');
+const OrganizationMembership = require('../models/OrganizationMembership.model');
 
 // GET /api/settings
 exports.getSettings = async (req, res) => {
@@ -18,8 +20,16 @@ exports.updateSettings = async (req, res) => {
   res.json({ success: true, data: settings });
 };
 
-// POST /api/settings/setup — Initial gym setup (creates Settings + first admin user)
+// POST /api/settings/setup — Initial gym setup (guarded for bootstrap only)
 exports.initialSetup = async (req, res) => {
+  const existingGymOwner = await User.exists({ role: 'gymowner' });
+  if (existingGymOwner) {
+    return res.status(403).json({
+      success: false,
+      message: 'Initial setup is locked. Gym owners already exist. Please register through the SaaS onboarding flow.',
+    });
+  }
+
   const { gymName, address, phone, email, adminName, adminEmail, adminPassword } = req.body;
 
   const existingAdmin = await User.findOne({ email: adminEmail });
@@ -27,7 +37,22 @@ exports.initialSetup = async (req, res) => {
     return res.status(400).json({ success: false, message: 'Admin email already in use' });
   }
 
+  const slug = (gymName || 'gym')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '') || `gym-${Date.now()}`;
+
+  const organization = await Organization.create({
+    name: gymName || 'My Gym',
+    slug,
+    email: email || adminEmail,
+    phone,
+    address,
+  });
+
   const settings = await Settings.create({
+    organizationId: organization._id,
     gymName,
     address,
     phone,
@@ -36,17 +61,25 @@ exports.initialSetup = async (req, res) => {
   });
 
   const admin = await User.create({
-    gymId: settings._id,
+    gymId: organization._id,
     name: adminName,
     email: adminEmail,
     password: adminPassword,
     role: 'gymowner',
+    isEmailVerified: true,
+  });
+
+  await OrganizationMembership.create({
+    organizationId: organization._id,
+    userId: admin._id,
+    role: 'gymowner',
+    status: 'active',
   });
 
   res.status(201).json({
     success: true,
     message: 'Gym setup complete',
-    data: { settings, admin: admin.toJSON() },
+    data: { organization, settings, admin: admin.toJSON() },
   });
 };
 

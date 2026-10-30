@@ -34,6 +34,9 @@ exports.getMembers = async (req, res) => {
   const { page = 1, limit = 20, search, status, filter, planId } = req.query;
 
   const query = { gymId, isDeleted: false };
+  if (req.user.role === 'trainer' || req.tenant?.role === 'trainer') {
+    query.trainerId = req.user._id;
+  }
   const andConditions = [];
 
   const expiredMemberIds = await getExpiredMemberIds(gymId);
@@ -117,7 +120,12 @@ exports.getMembers = async (req, res) => {
 
 // @route GET /api/members/:id
 exports.getMember = async (req, res) => {
-  const member = await Member.findOne({ _id: req.params.id, gymId: getGymId(req), isDeleted: false })
+  const query = { _id: req.params.id, gymId: getGymId(req), isDeleted: false };
+  if (req.user.role === 'trainer' || req.tenant?.role === 'trainer') {
+    query.trainerId = req.user._id;
+  }
+
+  const member = await Member.findOne(query)
     .populate('currentPlanId')
     .populate('trainerId', 'name email phone');
 
@@ -218,9 +226,10 @@ exports.createMember = async (req, res) => {
 
 // @route PUT /api/members/:id
 exports.updateMember = async (req, res) => {
+  const { gymId: _ignored, ...updateData } = req.body;
   const member = await Member.findOneAndUpdate(
-    { _id: req.params.id, gymId: getGymId(req) },
-    req.body,
+    { _id: req.params.id, gymId: getGymId(req), isDeleted: false },
+    updateData,
     { new: true, runValidators: true }
   );
   if (!member) return res.status(404).json({ success: false, message: 'Member not found' });
@@ -231,7 +240,7 @@ exports.updateMember = async (req, res) => {
 // @route DELETE /api/members/:id (soft delete)
 exports.deleteMember = async (req, res) => {
   const member = await Member.findOneAndUpdate(
-    { _id: req.params.id, gymId: getGymId(req) },
+    { _id: req.params.id, gymId: getGymId(req), isDeleted: false },
     { isDeleted: true },
     { new: true }
   );
@@ -242,21 +251,30 @@ exports.deleteMember = async (req, res) => {
 
 // @route POST /api/members/:id/freeze
 exports.freezeMembership = async (req, res) => {
-  const membership = await Membership.findOne({ memberId: req.params.id, status: 'active' });
+  const gymId = getGymId(req);
+  const member = await Member.findOne({ _id: req.params.id, gymId, isDeleted: false });
+  if (!member) return res.status(404).json({ success: false, message: 'Member not found' });
+
+  const membership = await Membership.findOne({ memberId: member._id, gymId, status: 'active' });
   if (!membership) return res.status(404).json({ success: false, message: 'No active membership found' });
 
   membership.status = 'frozen';
   membership.freezeStartDate = new Date();
   await membership.save();
 
-  await Member.findByIdAndUpdate(req.params.id, { membershipStatus: 'frozen' });
+  member.membershipStatus = 'frozen';
+  await member.save();
 
   res.json({ success: true, message: 'Membership frozen successfully' });
 };
 
 // @route POST /api/members/:id/unfreeze
 exports.unfreezeMembership = async (req, res) => {
-  const membership = await Membership.findOne({ memberId: req.params.id, status: 'frozen' });
+  const gymId = getGymId(req);
+  const member = await Member.findOne({ _id: req.params.id, gymId, isDeleted: false });
+  if (!member) return res.status(404).json({ success: false, message: 'Member not found' });
+
+  const membership = await Membership.findOne({ memberId: member._id, gymId, status: 'frozen' });
   if (!membership) return res.status(404).json({ success: false, message: 'No frozen membership found' });
 
   const freezeDays = Math.ceil(
@@ -268,15 +286,20 @@ exports.unfreezeMembership = async (req, res) => {
   membership.freezeStartDate = null;
   await membership.save();
 
-  await Member.findByIdAndUpdate(req.params.id, { membershipStatus: 'active' });
+  member.membershipStatus = 'active';
+  await member.save();
 
   res.json({ success: true, message: 'Membership unfrozen. End date extended.', data: membership });
 };
 
 // @route GET /api/members/:id/attendance
 exports.getMemberAttendance = async (req, res) => {
+  const gymId = getGymId(req);
+  const member = await Member.findOne({ _id: req.params.id, gymId, isDeleted: false });
+  if (!member) return res.status(404).json({ success: false, message: 'Member not found' });
+
   const { page = 1, limit = 30 } = req.query;
-  const attendance = await Attendance.find({ memberId: req.params.id })
+  const attendance = await Attendance.find({ memberId: member._id, gymId })
     .sort({ checkInTime: -1 })
     .skip((page - 1) * limit)
     .limit(Number(limit));
@@ -286,15 +309,20 @@ exports.getMemberAttendance = async (req, res) => {
 
 // @route GET /api/members/:id/payments
 exports.getMemberPayments = async (req, res) => {
-  const payments = await Payment.find({ memberId: req.params.id }).sort({ date: -1 });
+  const gymId = getGymId(req);
+  const member = await Member.findOne({ _id: req.params.id, gymId, isDeleted: false });
+  if (!member) return res.status(404).json({ success: false, message: 'Member not found' });
+
+  const payments = await Payment.find({ memberId: member._id, gymId }).sort({ date: -1 });
   res.json({ success: true, data: payments });
 };
 
 // @route GET /api/members/:id/card
 exports.downloadMemberCard = async (req, res) => {
-  const member = await Member.findById(req.params.id);
+  const gymId = getGymId(req);
+  const member = await Member.findOne({ _id: req.params.id, gymId, isDeleted: false });
   if (!member) return res.status(404).json({ success: false, message: 'Member not found' });
 
-  const gym = await Settings.findById(getGymId(req));
+  const gym = await Settings.findById(gymId);
   generateMemberCard(res, { member, gym: gym || {} });
 };

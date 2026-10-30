@@ -14,6 +14,9 @@ const generateTokens = (userId) => {
   return { accessToken, refreshToken };
 };
 
+const Organization = require('../models/Organization.model');
+const OrganizationMembership = require('../models/OrganizationMembership.model');
+
 // @route  POST /api/auth/login
 exports.login = async (req, res) => {
   const { email, password } = req.body;
@@ -31,15 +34,29 @@ exports.login = async (req, res) => {
     return res.status(403).json({ success: false, message: 'Account deactivated. Contact admin.' });
   }
 
+  // Get active memberships across all gyms
+  const memberships = await OrganizationMembership.find({ userId: user._id, status: 'active' })
+    .populate('organizationId', 'name slug status trialEndsAt currency currencySymbol')
+    .lean();
+
+  // If user has memberships and no gymId is set, default to first active gym
+  if (!user.gymId && memberships.length > 0 && memberships[0].organizationId) {
+    user.gymId = memberships[0].organizationId._id;
+  }
+
   const { accessToken, refreshToken } = generateTokens(user._id);
   user.refreshToken = refreshToken;
   user.lastLogin = new Date();
   await user.save();
 
-  // Get gym settings if applicable
+  // Get active gym settings & organization info if applicable
   let gymSettings = null;
+  let activeOrganization = null;
   if (user.gymId) {
-    gymSettings = await Settings.findById(user.gymId).lean();
+    [gymSettings, activeOrganization] = await Promise.all([
+      Settings.findOne({ $or: [{ _id: user.gymId }, { organizationId: user.gymId }] }).lean(),
+      Organization.findById(user.gymId).lean(),
+    ]);
   }
 
   // If member role, attach member profile info
@@ -56,6 +73,8 @@ exports.login = async (req, res) => {
     refreshToken,
     user: user.toJSON(),
     gymSettings,
+    activeOrganization,
+    memberships,
     memberProfile,
   });
 };
@@ -166,9 +185,92 @@ exports.resetPassword = async (req, res) => {
 // @route  GET /api/auth/me
 exports.getMe = async (req, res) => {
   const user = await User.findById(req.user._id);
+  const memberships = await OrganizationMembership.find({ userId: user._id, status: 'active' })
+    .populate('organizationId', 'name slug status trialEndsAt currency currencySymbol')
+    .lean();
+
   let gymSettings = null;
+  let activeOrganization = null;
   if (user.gymId) {
-    gymSettings = await Settings.findById(user.gymId).lean();
+    [gymSettings, activeOrganization] = await Promise.all([
+      Settings.findOne({ $or: [{ _id: user.gymId }, { organizationId: user.gymId }] }).lean(),
+      Organization.findById(user.gymId).lean(),
+    ]);
   }
-  res.json({ success: true, user, gymSettings });
+
+  res.json({ success: true, user, gymSettings, activeOrganization, memberships });
+};
+
+// @route  POST /api/auth/switch-gym/:orgId
+exports.switchGym = async (req, res) => {
+  const { orgId } = req.params;
+
+  // Verify membership
+  const membership = await OrganizationMembership.findOne({
+    userId: req.user._id,
+    organizationId: orgId,
+    status: 'active',
+  }).populate('organizationId');
+
+  if (!membership) {
+    return res.status(403).json({ success: false, message: 'You do not have an active membership in this gym' });
+  }
+
+  const user = await User.findById(req.user._id);
+  user.gymId = orgId;
+  await user.save();
+
+  const { accessToken, refreshToken } = generateTokens(user._id);
+  user.refreshToken = refreshToken;
+  await user.save();
+
+  const gymSettings = await Settings.findOne({ $or: [{ _id: orgId }, { organizationId: orgId }] }).lean();
+
+  res.json({
+    success: true,
+    message: `Switched active gym to ${membership.organizationId.name}`,
+    accessToken,
+    refreshToken,
+    activeGym: membership.organizationId,
+    activeRole: membership.role,
+    gymSettings,
+  });
+};
+
+// @route  POST /api/auth/impersonate/:orgId (Super Admin Support Impersonation)
+exports.impersonateGym = async (req, res) => {
+  if (req.user.role !== 'superadmin') {
+    return res.status(403).json({ success: false, message: 'Only Super Admin can initiate gym support impersonation' });
+  }
+
+  const { orgId } = req.params;
+  const { reason } = req.body;
+
+  const org = await Organization.findOne({ _id: orgId, isDeleted: false });
+  if (!org) {
+    return res.status(404).json({ success: false, message: 'Gym not found' });
+  }
+
+  // Audit log support impersonation
+  const ActivityLog = require('../models/ActivityLog.model');
+  await ActivityLog.create({
+    gymId: org._id,
+    userId: req.user._id,
+    action: 'superadmin.support_impersonation',
+    description: `Super Admin "${req.user.name}" started support session for gym "${org.name}". Reason: ${reason || 'Technical Support'}`,
+    metadata: { superAdminEmail: req.user.email, targetGymId: org._id, reason },
+  });
+
+  const supportToken = jwt.sign(
+    { id: req.user._id, gymContext: org._id, isImpersonating: true },
+    process.env.JWT_SECRET,
+    { expiresIn: '1h' }
+  );
+
+  res.json({
+    success: true,
+    message: `Support impersonation active for "${org.name}" (1 hour duration)`,
+    supportToken,
+    targetGym: org,
+  });
 };
